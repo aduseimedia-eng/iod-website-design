@@ -8,6 +8,11 @@ import { navigation as defaultNavigation } from "@/data/navigation";
 import { CmsNavigationItem, getPublishedCmsMenu } from "@/lib/api/cms";
 
 type HeaderLink = { label: string; href: string; newTab?: boolean; children?: Array<{ label: string; href: string; description?: string; newTab?: boolean }> };
+const homeLink: HeaderLink = { label: "Home", href: "/" };
+
+function withHomeLink(items: HeaderLink[]) {
+  return [homeLink, ...items.filter((item) => item.href !== "/" && item.label.toLowerCase() !== "home")];
+}
 
 function asHeaderLinks(items: CmsNavigationItem[]): HeaderLink[] {
   const enabled = items.filter((item) => item.is_enabled);
@@ -23,7 +28,7 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [desktopMenuDismissed, setDesktopMenuDismissed] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [menu, setMenu] = useState<HeaderLink[]>(defaultNavigation);
+  const [menu, setMenu] = useState<HeaderLink[]>(() => withHomeLink(defaultNavigation));
   const pathname = usePathname();
   const isHomepage = pathname === "/";
 
@@ -44,7 +49,7 @@ export function Header() {
     const timer = window.setTimeout(() => {
       getPublishedCmsMenu("header-primary").then((cmsMenu) => {
         const links = asHeaderLinks(cmsMenu.published_revision?.items || []);
-        if (!cancelled && cmsMenu.published_revision) setMenu(links);
+        if (!cancelled && cmsMenu.published_revision) setMenu(withHomeLink(links));
       }).catch(() => undefined);
     }, 0);
     return () => { cancelled = true; window.clearTimeout(timer); };
@@ -71,10 +76,10 @@ export function Header() {
             })}
           </ul>
         </nav>
-        <div className="hidden items-center gap-6 md:flex"><Link href="/login" className={`text-[0.6875rem] font-bold tracking-[0.06em] transition-colors ${isHomepage ? "text-white hover:text-[var(--color-accent-light)]" : "text-[var(--color-ink)] hover:text-[var(--color-accent-dark)]"}`}>MEMBER LOGIN</Link><Link href="/membership/apply" className={`px-6 py-3.5 text-[0.6875rem] font-bold tracking-[0.05em] transition-colors ${isHomepage ? "border border-white text-white hover:bg-white hover:text-[var(--color-ink)]" : "bg-[#2c1972] text-white hover:bg-[#211454]"}`}>JOIN IOD-GH</Link></div>
+        <div className="hidden items-center md:flex"><Link href="/membership/apply" className={`px-6 py-3.5 text-[0.6875rem] font-bold tracking-[0.05em] transition-colors ${isHomepage ? "border border-white text-white hover:bg-white hover:text-[var(--color-ink)]" : "bg-[#2c1972] text-white hover:bg-[#211454]"}`}>JOIN IOD-GH</Link></div>
         <button className="grid h-10 w-10 place-items-center xl:hidden" type="button" aria-expanded={menuOpen} aria-controls="mobile-navigation" onClick={() => setMenuOpen(!menuOpen)}><span className="sr-only">Toggle menu</span><span className={`block w-6 border-t-2 before:mt-1.5 before:block before:border-t-2 after:mt-1.5 after:block after:border-t-2 ${isHomepage ? "border-white before:border-white after:border-white" : "border-[var(--color-ink)] before:border-[var(--color-ink)] after:border-[var(--color-ink)]"}`} /></button>
       </div>
-      {menuOpen && <nav id="mobile-navigation" className="border-t border-[var(--color-line)] bg-[var(--color-warm-white)] px-6 py-5 xl:hidden" aria-label="Mobile navigation"><div className="site-container flex flex-col">{menu.map((item) => <details key={item.label} className="group border-b border-[var(--color-line)]"><summary className="flex cursor-pointer list-none items-center justify-between py-4 font-serif text-2xl"><span>{item.label}</span><span aria-hidden="true" className="font-sans text-base transition-transform group-open:rotate-45">+</span></summary><ul className="-mt-1 space-y-1 pb-4 pl-3"><li><Link onClick={() => setMenuOpen(false)} href={item.href} target={item.newTab ? "_blank" : undefined} rel={item.newTab ? "noopener noreferrer" : undefined} className="block py-2 text-sm font-semibold text-[var(--color-ink)]">{item.label}</Link></li>{item.children?.map((child) => <li key={child.href}><Link onClick={() => setMenuOpen(false)} href={child.href} target={child.newTab ? "_blank" : undefined} rel={child.newTab ? "noopener noreferrer" : undefined} className="block py-2 text-sm text-[var(--color-slate)] hover:text-[var(--color-ink)]">{child.label}</Link></li>)}</ul></details>)}<div className="mt-6 flex items-center gap-5"><Link onClick={() => setMenuOpen(false)} href="/login" className="text-sm font-bold text-[var(--color-ink)]">MEMBER LOGIN</Link><Link onClick={() => setMenuOpen(false)} href="/membership/apply" className="bg-[var(--color-ink)] px-4 py-3 text-xs font-bold tracking-[0.05em] text-white">JOIN IOD-GH</Link></div></div></nav>}
+      {menuOpen && <nav id="mobile-navigation" className="border-t border-[var(--color-line)] bg-[var(--color-warm-white)] px-6 py-5 xl:hidden" aria-label="Mobile navigation"><div className="site-container flex flex-col">{menu.map((item) => item.children?.length ? <details key={item.label} className="group border-b border-[var(--color-line)]"><summary className="flex cursor-pointer list-none items-center justify-between py-4 font-serif text-2xl"><span>{item.label}</span><span aria-hidden="true" className="font-sans text-base transition-transform group-open:rotate-45">+</span></summary><ul className="-mt-1 space-y-1 pb-4 pl-3"><li><Link onClick={() => setMenuOpen(false)} href={item.href} target={item.newTab ? "_blank" : undefined} rel={item.newTab ? "noopener noreferrer" : undefined} className="block py-2 text-sm font-semibold text-[var(--color-ink)]">{item.label}</Link></li>{item.children.map((child) => <li key={child.href}><Link onClick={() => setMenuOpen(false)} href={child.href} target={child.newTab ? "_blank" : undefined} rel={child.newTab ? "noopener noreferrer" : undefined} className="block py-2 text-sm text-[var(--color-slate)] hover:text-[var(--color-ink)]">{child.label}</Link></li>)}</ul></details> : <Link key={item.label} onClick={() => setMenuOpen(false)} href={item.href} target={item.newTab ? "_blank" : undefined} rel={item.newTab ? "noopener noreferrer" : undefined} className="border-b border-[var(--color-line)] py-4 font-serif text-2xl text-[var(--color-ink)]">{item.label}</Link>)}<div className="mt-6"><Link onClick={() => setMenuOpen(false)} href="/membership/apply" className="bg-[var(--color-ink)] px-4 py-3 text-xs font-bold tracking-[0.05em] text-white">JOIN IOD-GH</Link></div></div></nav>}
     </header>
   );
 }

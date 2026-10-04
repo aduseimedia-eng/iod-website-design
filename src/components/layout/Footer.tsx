@@ -16,6 +16,7 @@ export function FooterContent({ settings }: { settings: Record<string, unknown> 
   const footer = footerConfig(settings);
   if (!footer.enabled) return null;
   const columns = footer.columns.filter((column) => column.enabled);
+  const bottomLinks = [{ label: "Member login", href: "/login", enabled: true, new_tab: false }, ...footer.bottom_links.filter((item) => item.href !== "/login")];
   const logoUrl = /^(https?:\/\/|\/(?!\/))/i.test(footer.logo_url) ? footer.logo_url : "";
   const count = 1 + columns.length + Number(footer.newsletter_enabled);
   const grid = count >= 4 ? "xl:grid-cols-4" : count === 3 ? "xl:grid-cols-3" : "";
@@ -28,7 +29,7 @@ export function FooterContent({ settings }: { settings: Record<string, unknown> 
       {columns.map((column, index) => <div key={index}><h2 className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-gold-light)]">{column.title}</h2><ul className="mt-5 space-y-3 text-sm text-[var(--color-mist)]"><FooterLinks links={column.links} /></ul></div>)}
       {footer.newsletter_enabled && <div><h2 className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-gold-light)]">{footer.newsletter_heading}</h2><p className="mt-5 whitespace-pre-line text-sm leading-6 text-[var(--color-mist)]">{footer.newsletter_description}</p>{footer.newsletter_label && linkUrl(footer.newsletter_href) && <Link href={linkUrl(footer.newsletter_href)} className="mt-5 inline-flex border-b border-[var(--color-gold)] pb-3 text-xs font-bold uppercase tracking-[0.1em] text-[var(--color-gold-light)] hover:text-white">{footer.newsletter_label} <span aria-hidden="true" className="ml-4">→</span></Link>}</div>}
     </div>
-    <div className="flex flex-col justify-between gap-3 pt-7 text-xs text-[var(--color-mist)] sm:flex-row"><p>{footer.copyright.replaceAll("{year}", String(new Date().getFullYear()))}</p><ul className="flex flex-wrap gap-5"><FooterLinks links={footer.bottom_links} /></ul></div>
+    <div className="flex flex-col justify-between gap-3 pt-7 text-xs text-[var(--color-mist)] sm:flex-row"><p>{footer.copyright.replaceAll("{year}", String(new Date().getFullYear()))}</p><ul className="flex flex-wrap gap-5"><FooterLinks links={bottomLinks} /></ul></div>
   </div></footer>;
 }
 
