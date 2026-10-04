@@ -58,7 +58,6 @@ export function Header() {
   return (
     <header className={`${isHomepage ? "fixed" : "sticky"} inset-x-0 top-0 z-50 border-b transition-colors duration-300 ${isHomepage ? hasScrolled ? "border-white/15 bg-[rgb(39_27_84_/_0.82)] text-white backdrop-blur-md" : "border-white/10 bg-[var(--color-ink)] text-white" : "border-[var(--color-line)] bg-[rgb(252_251_254_/_0.97)] text-[var(--color-ink)] backdrop-blur"}`}>
       <div className="site-container flex h-[72px] items-center justify-between">
-        <Logo inverse={isHomepage} />
         <nav className="hidden h-full xl:block" aria-label="Main navigation">
           <ul className="flex h-full items-center gap-7">
             {menu.map((item) => {
