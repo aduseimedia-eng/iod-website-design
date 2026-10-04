@@ -90,7 +90,7 @@ export function HeroCarousel({ slides = fallbackSlides }: { slides?: HeroSlide[]
           key={slide.id}
           role="img"
           aria-label={index === currentIndex ? slide.alt : undefined}
-          className={`absolute inset-0 -z-20 bg-cover bg-center transition-[opacity,transform] duration-1000 ease-in-out motion-reduce:transition-none ${index === currentIndex ? "scale-100 opacity-100" : "scale-[1.025] opacity-0"}`}
+          className={`absolute inset-0 -z-20 bg-cover bg-center transition-[opacity,transform] duration-1000 ease-in-out motion-reduce:transition-none ${index === currentIndex ? "hero-image-motion opacity-100" : "scale-[1.025] opacity-0"}`}
           style={{ backgroundImage: `url("${slide.imageUrl}")` }}
         />
       ))}
