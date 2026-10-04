@@ -8,6 +8,7 @@ import { SectionRenderer } from "@/components/cms/ContentRenderer";
 
 import { HomeIntroduction } from "@/components/content/HomeIntroduction";
 import { HomeTrainingCountdown } from "@/components/content/HomeTrainingCountdown";
+import { HomepageWhatsApp } from "@/components/content/HomepageWhatsApp";
 import { PartnerLogos } from "@/components/content/PartnerLogos";
 import { HeroCarousel, type HeroSlide } from "@/components/ui/HeroCarousel";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -202,5 +203,5 @@ export function HomepageContent({ revision, initialKnowledgeItems = [], initialK
     const bPosition = b.section_type === "training_countdown" ? membershipPosition + 0.5 : b.position;
     return aPosition - bPosition;
   });
-  return <main>{revision ? visibleSections?.map((section, index) => <div key={section.id || index}>{section.section_type === "training_countdown" ? <HomeTrainingCountdown data={section.data} /> : designedSections[String(section.data.home_section)] || <SectionRenderer section={section} />}</div>) : Object.entries(designedSections).map(([key, section]) => <div key={key}>{section}</div>)}</main>;
+  return <main>{revision ? visibleSections?.map((section, index) => <div key={section.id || index}>{section.section_type === "training_countdown" ? <HomeTrainingCountdown data={section.data} /> : designedSections[String(section.data.home_section)] || <SectionRenderer section={section} />}</div>) : Object.entries(designedSections).map(([key, section]) => <div key={key}>{section}</div>)}<HomepageWhatsApp /></main>;
 }
