@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "IoD-Gh PostgreSQL",
+      "Group": "Servers",
+      "Host": "database",
+      "Port": 5432,
+      "MaintenanceDB": "iod_gh",
+      "Username": "iod_gh",
+      "SSLMode": "prefer"
+    }
+  }
+}

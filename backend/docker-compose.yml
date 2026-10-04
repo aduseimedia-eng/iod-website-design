@@ -1,0 +1,34 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: iod_gh
+      POSTGRES_USER: iod_gh
+      POSTGRES_PASSWORD: iod_gh
+    ports:
+      - "55432:5432"
+    volumes:
+      - iod_gh_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U iod_gh -d iod_gh"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "5050:80"
+    volumes:
+      - iod_gh_pgadmin_server_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      database:
+        condition: service_healthy
+
+volumes:
+  iod_gh_postgres_data:
+  iod_gh_pgadmin_server_data:

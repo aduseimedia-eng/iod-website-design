@@ -1,0 +1,41 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { CmsRouteSwitch } from "@/components/cms/CmsPublishedRoute";
+import { SiteSettingsProvider } from "@/components/cms/SiteSettings";
+import { apiBaseUrl } from "@/lib/api/client";
+import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const defaultMetadata: Metadata = {
+  title: "Institute of Directors–Ghana | Advancing Directors",
+  description: "IoD-Gh is Ghana's professional community for directors and governance leaders.",
+};
+
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const response = await fetch(apiBaseUrl + "/api/v2/cms/site/", { cache: "no-store" });
+    const { settings } = await response.json();
+    return { ...defaultMetadata, ...(settings.website_name ? { title: settings.website_name } : {}), ...(settings.favicon_url ? { icons: { icon: settings.favicon_url } } : {}) };
+  } catch { return defaultMetadata; }
+}
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className={inter.variable}>
+      <body className="min-h-screen">
+        <SiteSettingsProvider>
+        <Header />
+        <CmsRouteSwitch>{children}</CmsRouteSwitch>
+        <Footer />
+        </SiteSettingsProvider>
+      </body>
+    </html>
+  );
+}
