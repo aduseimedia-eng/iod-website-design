@@ -29,7 +29,7 @@ function PartnerCarousel({ title, partners }: { title: string; partners: Partner
       const logo = <Image src={webUrl(item.image_url)} alt={alt} width={240} height={120} unoptimized className="h-20 w-full object-contain" />;
       const href = webUrl(item.href);
       const tile = "flex min-h-32 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white p-5";
-      return <li key={item.id} className="w-[calc((100%-1rem)/2)] shrink-0 snap-start">{href ? <Link href={href} aria-label={item.title || alt} className={tile + " transition-colors hover:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"}>{logo}</Link> : <div className={tile}>{logo}</div>}</li>;
+      return <li key={item.id} className="w-[calc((100%-1rem)/2)] shrink-0 snap-start sm:w-[calc((100%-3rem)/4)]">{href ? <Link href={href} aria-label={item.title || alt} className={tile + " transition-colors hover:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"}>{logo}</Link> : <div className={tile}>{logo}</div>}</li>;
     })}
   </ul></div>;
 }
