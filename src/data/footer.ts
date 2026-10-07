@@ -14,6 +14,7 @@ export const defaultFooter: FooterConfig = {
   columns: [
     { title: "The Institute", enabled: true, links: [link("About us", "/about"), link("Council", "/about/council"), link("Strategic partners", "/about/partners"), link("Contact", "/contact")] },
     { title: "For directors", enabled: true, links: [link("Membership", "/membership"), link("Professional development", "/training"), link("Events", "/events"), link("Resources", "/knowledge")] },
+    { title: "Useful links", enabled: true, links: [link("Apply for membership", "/membership/apply"), link("Membership verification", "/membership/verify"), link("Board evaluation", "/services/board-evaluation"), link("Governance consultancy", "/services/consultancy"), link("Corporate meetings", "/services/corporate-meeting")] },
   ],
   bottom_links: [link("Privacy", "#"), link("Terms", "#")],
   copyright: "© {year} Institute of Directors–Ghana. All rights reserved.",
