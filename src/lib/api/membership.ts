@@ -22,6 +22,7 @@ export type MembershipApplication = {
   submitted_at: string; updated_at: string;
 };
 export type MembershipStatusHistory = { previous_status: string; new_status: string; reason: string; changed_by_email: string | null; created_at: string };
+export type PublicMemberVerification = { membership_number: string; full_name: string; membership_type: string; status: "active"; membership_end_date: string | null };
 export type ApprovalData = { membership_type: string; membership_start_date: string; membership_end_date?: string | null; public_listing: boolean; reason?: string };
 export type RenewalData = { period_start: string; period_end: string; amount: string; currency: string; due_date: string };
 // Preserve the established directory layout while keeping the post-nominal's "o" lowercase.
@@ -37,6 +38,7 @@ export const getMembershipTypes = () => apiRequest<MembershipType[]>("/membershi
 export const getStaffApplications = () => apiRequest<MembershipApplication[]>("/membership/staff/applications/");
 export const getStaffMembers = () => apiRequest<MemberProfile[]>("/membership/staff/members/");
 export const getPublicDirectory = (query = "") => apiRequest<DirectoryEntry[]>(`/membership/directory/${query ? `?q=${encodeURIComponent(query)}` : ""}`);
+export const verifyPublicMember = (membershipNumber: string) => apiRequest<PublicMemberVerification>(`/membership/members/verify/?member_number=${encodeURIComponent(membershipNumber.trim())}`);
 export const getStaffDirectory = () => apiRequest<DirectoryEntry[]>("/membership/staff/directory/");
 export const createDirectoryEntry = (data: Omit<DirectoryEntry, "id">) => apiRequest<DirectoryEntry>("/membership/staff/directory/", { method: "POST", body: JSON.stringify(data) });
 export const updateDirectoryEntry = (id: string, data: Partial<Omit<DirectoryEntry, "id">>) => apiRequest<DirectoryEntry>(`/membership/staff/directory/${id}/`, { method: "PATCH", body: JSON.stringify(data) });

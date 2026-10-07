@@ -6,8 +6,8 @@ import { notFound } from "next/navigation";
 import { EditableLink as Link } from "@/components/cms/EditableCopy";
 import { MembersDirectory } from "@/components/membership/MembersDirectory";
 import { MembershipHero } from "@/components/membership/MembershipHero";
+import { MemberVerification } from "@/components/membership/MemberVerification";
 import { Button } from "@/components/ui/Button";
-import { FormInput } from "@/components/ui/FormFields";
 import { membershipCategories } from "@/data/site";
 import {
   corporateMembershipFees,
@@ -287,17 +287,7 @@ export default async function MembershipDetail({
       ) : (
         <section className="bg-white py-20 sm:py-28">
           <div className="site-container max-w-4xl">
-            {verify ? (
-              <form className="border border-[var(--color-line)] bg-[var(--color-warm-white)] p-7 sm:p-10">
-                <FormInput
-                  label="Membership number or name"
-                  placeholder="e.g. M-12345 or Ama Mensah"
-                  required
-                />
-                <Button href="#" className="mt-6"><EditableCopy label="Link text" fallback={"Verify membership"} /></Button>
-                <p className="mt-5 text-sm leading-6 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={"Verification will connect to the membership directory in a later phase."} /></p>
-              </form>
-            ) : categories ? (
+            {verify ? <MemberVerification /> : categories ? (
               <div className="space-y-0">
                 {membershipCategories.map((category, index) => (
                   <article
