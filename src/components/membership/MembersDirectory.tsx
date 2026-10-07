@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { DirectoryEntry, getPublicDirectory } from "@/lib/api/membership";
+import { DIRECTORY_DESIGNATIONS, DirectoryEntry, getPublicDirectory } from "@/lib/api/membership";
 
 const labels: Record<DirectoryEntry["designation"], string> = { HFIoD: "Honorary Fellows", FIoD: "Fellows", MIoD: "Members", AIoD: "Associates" };
-const designations: DirectoryEntry["designation"][] = ["HFIoD", "FIoD", "MIoD", "AIoD"];
+const designations = DIRECTORY_DESIGNATIONS;
 const alphabet = ["All", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
 const pageSize = 150;
 
