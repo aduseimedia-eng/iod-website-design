@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
@@ -139,15 +140,19 @@ class MyRenewalsView(APIView):
 class PublicMemberVerificationView(APIView):
     permission_classes = [AllowAny]
 
-    @extend_schema(parameters=[OpenApiParameter(name="member_name", required=True, type=OpenApiTypes.STR)], responses={200: PublicMemberVerificationSerializer})
+    @extend_schema(parameters=[OpenApiParameter(name="member_name", required=True, type=OpenApiTypes.STR)], responses={200: PublicMemberVerificationSerializer(many=True)})
     def get(self, request):
         member_name = " ".join(request.query_params.get("member_name", "").split())
         if not member_name:
             raise ValidationError({"member_name": ["This query parameter is required."]})
-        entry = MemberDirectoryEntry.objects.filter(is_published=True, full_name__iexact=member_name).first()
-        if not entry:
+
+        name_query = Q()
+        for name_part in member_name.split(" "):
+            name_query &= Q(full_name__icontains=name_part)
+        entries = MemberDirectoryEntry.objects.filter(is_published=True).filter(name_query).order_by("full_name")[:12]
+        if not entries:
             raise NotFound("No member was found in the published Members in Good Standing register.")
-        return Response(PublicMemberVerificationSerializer(entry).data)
+        return Response(PublicMemberVerificationSerializer(entries, many=True).data)
 
 
 class PublicDirectoryView(APIView):

@@ -156,11 +156,21 @@ class MembershipApiTests(TestCase):
             as_of_date=date(2026, 9, 30),
             is_published=True,
         )
+        MemberDirectoryEntry.objects.create(
+            full_name="Akua Mensah",
+            designation=MemberDirectoryEntry.Designation.ASSOCIATE,
+            as_of_date=date(2026, 9, 30),
+            is_published=True,
+        )
 
-        verified = self.client.get("/api/v1/membership/members/verify/", {"member_name": entry.full_name})
+        verified = self.client.get("/api/v1/membership/members/verify/", {"member_name": "Mensah Ama"})
         self.assertEqual(verified.status_code, 200)
-        self.assertEqual(verified.json()["full_name"], entry.full_name)
-        self.assertEqual(verified.json()["designation"], entry.designation)
+        self.assertEqual(verified.json()[0]["full_name"], entry.full_name)
+        self.assertEqual(verified.json()[0]["designation"], entry.designation)
+
+        partial = self.client.get("/api/v1/membership/members/verify/", {"member_name": "Mensah"})
+        self.assertEqual(partial.status_code, 200)
+        self.assertEqual(len(partial.json()), 2)
 
         entry.is_published = False
         entry.save(update_fields=["is_published", "updated_at"])
