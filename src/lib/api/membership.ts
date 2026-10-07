@@ -22,13 +22,13 @@ export type MembershipApplication = {
   submitted_at: string; updated_at: string;
 };
 export type MembershipStatusHistory = { previous_status: string; new_status: string; reason: string; changed_by_email: string | null; created_at: string };
-export type PublicMemberVerification = { membership_number: string; full_name: string; membership_type: string; status: "active"; membership_end_date: string | null };
 export type ApprovalData = { membership_type: string; membership_start_date: string; membership_end_date?: string | null; public_listing: boolean; reason?: string };
 export type RenewalData = { period_start: string; period_end: string; amount: string; currency: string; due_date: string };
 // Preserve the established directory layout while keeping the post-nominal's "o" lowercase.
 export const DIRECTORY_DESIGNATIONS = ["HFIoD", "FIoD", "MIoD", "AIoD"] as const;
 
 export type DirectoryEntry = { id: string; full_name: string; designation: (typeof DIRECTORY_DESIGNATIONS)[number]; as_of_date: string; is_published: boolean; sort_order: number };
+export type PublicMemberVerification = Pick<DirectoryEntry, "full_name" | "designation" | "as_of_date">;
 
 export const getMyMemberProfile = () => apiRequest<MemberProfile>("/membership/members/me/");
 export const getMyRenewals = () => apiRequest<MembershipRenewal[]>("/membership/members/me/renewals/");

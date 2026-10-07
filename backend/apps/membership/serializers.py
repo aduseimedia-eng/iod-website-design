@@ -146,12 +146,9 @@ class MembershipRenewalCreateSerializer(serializers.ModelSerializer):
 
 
 class PublicMemberVerificationSerializer(serializers.ModelSerializer):
-    membership_type = serializers.CharField(source="membership_type.name", read_only=True)
-    full_name = serializers.CharField(read_only=True)
-
     class Meta:
-        model = MemberProfile
-        fields = ("membership_number", "full_name", "membership_type", "status", "membership_end_date")
+        model = MemberDirectoryEntry
+        fields = ("full_name", "designation", "as_of_date")
         read_only_fields = fields
 
 

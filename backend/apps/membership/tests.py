@@ -150,23 +150,21 @@ class MembershipApiTests(TestCase):
         self.assertTrue(AuditLog.objects.filter(action="membership.renewal_created").exists())
 
     def test_public_verification_only_exposes_members_in_good_standing(self):
-        application = self.submit_application()
-        client = self.csrf_client(self.officer)
-        approved = client.post(
-            f"/api/v1/membership/staff/applications/{application['reference']}/approve/",
-            data=json.dumps({"membership_type": str(self.membership_type.id), "membership_start_date": date.today().isoformat(), "public_listing": True}),
-            content_type="application/json",
+        entry = MemberDirectoryEntry.objects.create(
+            full_name="Ama Mensah",
+            designation=MemberDirectoryEntry.Designation.MEMBER,
+            as_of_date=date(2026, 9, 30),
+            is_published=True,
         )
-        member_number = approved.json()["membership_number"]
-        member = MemberProfile.objects.get(membership_number=member_number)
 
-        verified = self.client.get("/api/v1/membership/members/verify/", {"member_name": member.full_name})
+        verified = self.client.get("/api/v1/membership/members/verify/", {"member_name": entry.full_name})
         self.assertEqual(verified.status_code, 200)
-        self.assertEqual(verified.json()["membership_number"], member_number)
+        self.assertEqual(verified.json()["full_name"], entry.full_name)
+        self.assertEqual(verified.json()["designation"], entry.designation)
 
-        member.status = MemberProfile.Status.SUSPENDED
-        member.save(update_fields=["status", "updated_at"])
-        hidden = self.client.get("/api/v1/membership/members/verify/", {"member_name": member.full_name})
+        entry.is_published = False
+        entry.save(update_fields=["is_published", "updated_at"])
+        hidden = self.client.get("/api/v1/membership/members/verify/", {"member_name": entry.full_name})
         self.assertEqual(hidden.status_code, 404)
 
     def test_non_officer_cannot_access_staff_membership_records(self):
