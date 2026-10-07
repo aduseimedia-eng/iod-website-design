@@ -280,7 +280,7 @@ HOMEPAGE_PAGES = (
         "title": "Develop your directorship.",
         "summary": "Practical programmes that bring sharper insight and greater confidence to the work of the board.",
         "body": "",
-        "blocks": [],
+        "blocks": [{"type": "cta", "label": "Explore all events", "href": "/events"}],
     },
     {
         "slug": "home-knowledge",
