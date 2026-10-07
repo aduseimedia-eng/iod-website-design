@@ -276,7 +276,7 @@ HOMEPAGE_PAGES = (
     {
         "slug": "home-training",
         "label": "Homepage training heading",
-        "eyebrow": "Professional development",
+        "eyebrow": "Upcoming events",
         "title": "Develop your directorship.",
         "summary": "Practical programmes that bring sharper insight and greater confidence to the work of the board.",
         "body": "",
@@ -321,7 +321,7 @@ HOMEPAGE_PAGES = (
     {
         "slug": "training-page",
         "label": "Training page hero",
-        "eyebrow": "Professional development",
+        "eyebrow": "Upcoming events",
         "title": "Develop your directorship.",
         "summary": "Practical programmes for directors who want to lead boards with greater confidence, judgement and impact.",
         "body": "",
