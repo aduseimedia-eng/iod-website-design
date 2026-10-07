@@ -11,6 +11,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
+from django.db.models import Value
+from django.db.models.functions import Concat
 
 from apps.accounts.permissions import IsDirectoryManager, IsMembershipOfficer
 from apps.audit.services import record_event
@@ -140,12 +142,12 @@ class MyRenewalsView(APIView):
 class PublicMemberVerificationView(APIView):
     permission_classes = [AllowAny]
 
-    @extend_schema(parameters=[OpenApiParameter(name="member_number", required=True, type=OpenApiTypes.STR)], responses={200: PublicMemberVerificationSerializer})
+    @extend_schema(parameters=[OpenApiParameter(name="member_name", required=True, type=OpenApiTypes.STR)], responses={200: PublicMemberVerificationSerializer})
     def get(self, request):
-        member_number = request.query_params.get("member_number", "").strip()
-        if not member_number:
-            raise ValidationError({"member_number": ["This query parameter is required."]})
-        member = MemberProfile.objects.select_related("membership_type").filter(membership_number__iexact=member_number).first()
+        member_name = " ".join(request.query_params.get("member_name", "").split())
+        if not member_name:
+            raise ValidationError({"member_name": ["This query parameter is required."]})
+        member = MemberProfile.objects.select_related("membership_type").annotate(public_name=Concat("first_name", Value(" "), "last_name")).filter(public_name__iexact=member_name).first()
         if not member or not member.is_in_good_standing:
             raise NotFound("No publicly verifiable member was found.")
         return Response(PublicMemberVerificationSerializer(member).data)

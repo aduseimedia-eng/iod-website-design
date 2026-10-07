@@ -38,7 +38,7 @@ export const getMembershipTypes = () => apiRequest<MembershipType[]>("/membershi
 export const getStaffApplications = () => apiRequest<MembershipApplication[]>("/membership/staff/applications/");
 export const getStaffMembers = () => apiRequest<MemberProfile[]>("/membership/staff/members/");
 export const getPublicDirectory = (query = "") => apiRequest<DirectoryEntry[]>(`/membership/directory/${query ? `?q=${encodeURIComponent(query)}` : ""}`);
-export const verifyPublicMember = (membershipNumber: string) => apiRequest<PublicMemberVerification>(`/membership/members/verify/?member_number=${encodeURIComponent(membershipNumber.trim())}`);
+export const verifyPublicMember = (memberName: string) => apiRequest<PublicMemberVerification>(`/membership/members/verify/?member_name=${encodeURIComponent(memberName.trim())}`);
 export const getStaffDirectory = () => apiRequest<DirectoryEntry[]>("/membership/staff/directory/");
 export const createDirectoryEntry = (data: Omit<DirectoryEntry, "id">) => apiRequest<DirectoryEntry>("/membership/staff/directory/", { method: "POST", body: JSON.stringify(data) });
 export const updateDirectoryEntry = (id: string, data: Partial<Omit<DirectoryEntry, "id">>) => apiRequest<DirectoryEntry>(`/membership/staff/directory/${id}/`, { method: "PATCH", body: JSON.stringify(data) });

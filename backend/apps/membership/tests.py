@@ -158,15 +158,15 @@ class MembershipApiTests(TestCase):
             content_type="application/json",
         )
         member_number = approved.json()["membership_number"]
+        member = MemberProfile.objects.get(membership_number=member_number)
 
-        verified = self.client.get("/api/v1/membership/members/verify/", {"member_number": member_number})
+        verified = self.client.get("/api/v1/membership/members/verify/", {"member_name": member.full_name})
         self.assertEqual(verified.status_code, 200)
         self.assertEqual(verified.json()["membership_number"], member_number)
 
-        member = MemberProfile.objects.get(membership_number=member_number)
         member.status = MemberProfile.Status.SUSPENDED
         member.save(update_fields=["status", "updated_at"])
-        hidden = self.client.get("/api/v1/membership/members/verify/", {"member_number": member_number})
+        hidden = self.client.get("/api/v1/membership/members/verify/", {"member_name": member.full_name})
         self.assertEqual(hidden.status_code, 404)
 
     def test_non_officer_cannot_access_staff_membership_records(self):
