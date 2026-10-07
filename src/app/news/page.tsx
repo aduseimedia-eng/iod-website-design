@@ -17,7 +17,7 @@ function NewsCard({ item }: { item: CmsItem }) {
   return <article className="group overflow-hidden border border-[var(--color-line)] bg-white transition-colors hover:border-[var(--color-gold)]">
     <Link href={cmsHref(item.href)} className="flex h-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-accent-dark)]">
       <div className="relative w-32 shrink-0 bg-[var(--color-paper)] sm:w-36">
-        {imageUrl ? <Image src={imageUrl} alt={cmsMeta(item, "alt_text", item.title)} fill unoptimized className="object-cover" /> : <div className="grid h-full place-items-center p-3 text-center text-[0.6rem] font-bold tracking-[0.1em] text-[var(--color-slate)]">IOD-GH<br />NEWS</div>}
+        {imageUrl ? <Image src={imageUrl} alt={cmsMeta(item, "alt_text", item.title)} fill unoptimized className="object-cover" /> : <div className="grid h-full place-items-center p-3 text-center text-[0.6rem] font-bold tracking-[0.1em] text-[var(--color-slate)]">IoD-Gh<br />NEWS</div>}
       </div>
       <div className="flex min-w-0 flex-1 flex-col p-5">
         <p className="text-[0.65rem] font-bold tracking-[0.1em] text-[var(--color-accent-dark)]">{cmsMeta(item, "display_meta")}</p>
@@ -39,7 +39,7 @@ export default function NewsPage() {
     {featured && <section className="bg-white py-20 sm:py-28"><div className="site-container">
       <article className="overflow-hidden bg-[var(--color-ink)] text-white">
         <Link href={cmsHref(featured.href)} className="group grid focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-gold)] lg:grid-cols-2">
-          {featured.image_url ? <div role="img" aria-label={cmsMeta(featured, "alt_text", featured.title)} className="min-h-80 h-full w-full bg-cover bg-center" style={{ backgroundImage: `url("${featured.image_url}")` }} /> : <div className="grid min-h-80 place-items-center bg-[var(--color-paper)] text-xs font-bold tracking-[0.12em] text-[var(--color-slate)]">IOD-GH NEWS</div>}
+          {featured.image_url ? <div role="img" aria-label={cmsMeta(featured, "alt_text", featured.title)} className="min-h-80 h-full w-full bg-cover bg-center" style={{ backgroundImage: `url("${featured.image_url}")` }} /> : <div className="grid min-h-80 place-items-center bg-[var(--color-paper)] text-xs font-bold tracking-[0.12em] text-[var(--color-slate)]">IoD-Gh NEWS</div>}
           <div className="p-8 sm:p-12"><p className="eyebrow text-[var(--color-gold-light)]">{cmsMeta(featured, "display_meta")}</p><h2 className="mt-6 font-serif text-4xl leading-tight group-hover:underline"><EditableCopy label="Heading" fallback={String(featured.title ?? "")} /></h2><p className="mt-5 leading-7 text-[var(--color-mist)]"><EditableCopy label="Text" fallback={String(featured.summary ?? "")} /></p><span className="mt-8 inline-flex border-b border-[var(--color-gold)] pb-2 text-sm font-bold">Read story <span aria-hidden="true">&rarr;</span></span></div>
         </Link>
       </article>

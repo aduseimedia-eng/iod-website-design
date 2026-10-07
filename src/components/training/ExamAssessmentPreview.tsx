@@ -8,7 +8,7 @@ type Question = { id: string; prompt: string; options: { id: string; text: strin
 type Assessment = { heading: string; instructions: string; accessCode: string; durationSeconds: number; passMark: number; showAnswerReview: boolean; questions: Question[] };
 
 const fallback: Assessment = {
-  heading: "Corporate governance assessment", instructions: "Use the code issued by IoD-Gh. Read every question carefully, flag questions to review later, and submit only when you are ready.", accessCode: "IOD-GH-EXAM", durationSeconds: 45 * 60, passMark: 70, showAnswerReview: true,
+  heading: "Corporate governance assessment", instructions: "Use the code issued by IoD-Gh. Read every question carefully, flag questions to review later, and submit only when you are ready.", accessCode: "IoD-Gh-EXAM", durationSeconds: 45 * 60, passMark: 70, showAnswerReview: true,
   questions: [
     { id: "board-role", prompt: "Which statement best describes the role of a board of directors?", options: [{ id: "a", text: "To provide strategic direction and oversight." }, { id: "b", text: "To manage every daily operational activity." }, { id: "c", text: "To replace the executive management team." }, { id: "d", text: "To approve every individual expenditure." }], correctOptionId: "a" },
     { id: "governance-principle", prompt: "Which principle is essential to sound corporate governance?", options: [{ id: "a", text: "Clear accountability and responsible decision-making." }, { id: "b", text: "Avoiding communication with stakeholders." }, { id: "c", text: "Delegating all board responsibilities externally." }, { id: "d", text: "Keeping organisational objectives informal." }], correctOptionId: "a" },

@@ -203,8 +203,8 @@ export function HomepageContent({ revision, initialKnowledgeItems = [], initialK
   };
   const membershipPosition = revision?.sections.find((section) => section.data.home_section === "membership")?.position ?? 0;
   const visibleSections = revision?.sections.filter((section) => section.is_enabled).sort((a, b) => {
-    const aPosition = a.section_type === "training_countdown" ? membershipPosition + 0.5 : a.position;
-    const bPosition = b.section_type === "training_countdown" ? membershipPosition + 0.5 : b.position;
+    const aPosition = a.data.home_section === "hero" ? -1 : a.section_type === "training_countdown" ? membershipPosition + 0.5 : a.position;
+    const bPosition = b.data.home_section === "hero" ? -1 : b.section_type === "training_countdown" ? membershipPosition + 0.5 : b.position;
     return aPosition - bPosition;
   });
   return <main>{revision ? visibleSections?.map((section, index) => <div key={section.id || index}>{section.section_type === "training_countdown" ? <HomeTrainingCountdown data={section.data} /> : designedSections[String(section.data.home_section)] || <SectionRenderer section={section} />}</div>) : Object.entries(designedSections).map(([key, section]) => <div key={key}>{section}</div>)}<HomepageWhatsApp /></main>;
