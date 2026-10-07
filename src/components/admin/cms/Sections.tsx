@@ -48,6 +48,7 @@ function SectionFields({ section, onChange, onImage, canUpload }: { section: Sec
   if (section.section_type === "seminar_list") return <SeminarFields items={items} onChange={(items) => set("items", items)} canUpload={canUpload} />;
   if (section.section_type === "video_list") return <VideoFields items={items} onChange={(items) => set("items", items)} />;
   if (section.section_type === "training_countdown") return <TrainingCountdownFields data={data} onChange={onChange} />;
+  if (data.home_section === "partners") return <HomePartnersFields data={data} onChange={onChange} />;
   const headingKey = ["heading", "title", "label"].find((key) => key in data) || "heading";
   const copyKey = ["copy", "text", "description", "summary"].find((key) => key in data) || "copy";
   const listTypes = ["feature_list", "stat_grid", "card_grid", "faq", "document_list", ...(data.home_section === "hero" ? ["hero"] : [])];
@@ -68,6 +69,10 @@ function SectionFields({ section, onChange, onImage, canUpload }: { section: Sec
     </div>; })}<button type="button" className={buttonClass} onClick={() => set("items", [...items, { title: "", description: "" }])}>+ Add item</button></div>}
     {["article_feed", "event_feed"].includes(section.section_type) && <p className="text-sm text-[var(--color-slate)]">Published {section.section_type === "article_feed" ? "news" : "events"} appear here automatically.</p>}
   </>;
+}
+function HomePartnersFields({ data, onChange }: { data: Record<string, unknown>; onChange: (data: Record<string, unknown>) => void }) {
+  const set = (key: string, value: string) => onChange({ ...data, [key]: value });
+  return <div className="space-y-4"><p className="rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-4 text-sm text-[var(--color-slate)]">Homepage logos are managed on the main Partnerships page. The homepage automatically displays up to four strategic logos from there.</p><Field label="Heading" value={text(data, "heading")} onChange={(heading) => set("heading", heading)} /><Field label="Short introduction" value={text(data, "eyebrow")} onChange={(eyebrow) => set("eyebrow", eyebrow)} /><Area label="Description" value={text(data, "description")} onChange={(description) => set("description", description)} /><div className="grid gap-4 sm:grid-cols-2"><Field label="Button text" value={text(data, "button_label")} onChange={(button_label) => set("button_label", button_label)} /><Field label="Button link" value={text(data, "button_href")} onChange={(button_href) => set("button_href", button_href)} /></div></div>;
 }
 function GalleryFields({ data, onChange, canUpload }: { data: Record<string, unknown>; onChange: (data: Record<string, unknown>) => void; canUpload: boolean }) {
   const items = Array.isArray(data.items) ? data.items.filter((item): item is Record<string, unknown> => !!item && typeof item === "object" && !Array.isArray(item)) : [];
