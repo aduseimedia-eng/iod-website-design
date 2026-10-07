@@ -8,7 +8,7 @@ import { CmsPublicPage, getPublishedCmsPage } from "@/lib/api/cms";
 type Partner = { id: string; title: string; image_url: string; href: string; metadata: Record<string, unknown> };
 const webUrl = (value: string) => /^(https?:\/\/|\/(?!\/))/i.test(value.trim()) ? value.trim() : "";
 
-function PartnerCarousel({ title, partners }: { title: string; partners: Partner[] }) {
+function PartnerCarousel({ title, partners, fallbackHref = "" }: { title: string; partners: Partner[]; fallbackHref?: string }) {
   const carousel = useRef<HTMLUListElement>(null);
   const [paused, setPaused] = useState(false);
   const move = (direction: -1 | 1) => {
@@ -27,17 +27,17 @@ function PartnerCarousel({ title, partners }: { title: string; partners: Partner
     {partners.map((item) => {
       const alt = typeof item.metadata.alt_text === "string" && item.metadata.alt_text.trim() ? item.metadata.alt_text : item.title || "Partner logo";
       const logo = <Image src={webUrl(item.image_url)} alt={alt} width={240} height={120} unoptimized className="h-20 w-full object-contain" />;
-      const href = webUrl(item.href);
+      const href = webUrl(item.href) || webUrl(fallbackHref);
       const tile = "flex min-h-32 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white p-5";
       return <li key={item.id} className="w-[calc((100%-1rem)/2)] shrink-0 snap-start sm:w-[calc((100%-3rem)/4)]">{href ? <Link href={href} aria-label={item.title || alt} className={tile + " transition-colors hover:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"}>{logo}</Link> : <div className={tile}>{logo}</div>}</li>;
     })}
   </ul></div>;
 }
 
-export function PartnerLogos({ items }: { items: Partner[] }) {
+export function PartnerLogos({ items, fallbackHref }: { items: Partner[]; fallbackHref?: string }) {
   const partners = items.filter((item) => webUrl(item.image_url));
   if (!partners.length) return null;
-  return <PartnerCarousel title="Our partners" partners={partners} />;
+  return <PartnerCarousel title="Our partners" partners={partners} fallbackHref={fallbackHref} />;
 }
 
 function PartnerGrid({ title, partners }: { title: string; partners: Partner[] }) {
