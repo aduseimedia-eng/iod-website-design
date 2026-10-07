@@ -62,9 +62,9 @@ export function HomepagePartnerLogos({ fallbackHref }: { fallbackHref: string })
   useEffect(() => { let active = true; getPublishedCmsPage("about-partners").then((page) => { if (active) setPartners(partnerPageEntries(page)); }).catch(() => {}); return () => { active = false; }; }, []);
   const logos = partners.filter((item) => webUrl(item.image_url));
   const strategic = logos.filter((item) => item.metadata.partner_type === "strategic");
-  const homepageLogos = (strategic.length ? strategic : logos).slice(0, 4);
-  if (!homepageLogos.length) return null;
-  return <PartnerCarousel title="Strategic partners" partners={homepageLogos} fallbackHref={fallbackHref} />;
+  const corporate = logos.filter((item) => item.metadata.partner_type !== "strategic");
+  if (!logos.length) return null;
+  return <div className="space-y-7">{strategic.length > 0 && <PartnerCarousel title="Strategic partners" partners={strategic.slice(0, 4)} fallbackHref={fallbackHref} />}{corporate.length > 0 && <PartnerCarousel title="Corporate partners" partners={corporate.slice(0, 4)} fallbackHref={fallbackHref} />}</div>;
 }
 
 export function PartnersShowcase() {
