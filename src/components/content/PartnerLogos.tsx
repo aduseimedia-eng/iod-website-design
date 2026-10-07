@@ -64,7 +64,20 @@ export function HomepagePartnerLogos({ fallbackHref }: { fallbackHref: string })
   const strategic = logos.filter((item) => item.metadata.partner_type === "strategic");
   const corporate = logos.filter((item) => item.metadata.partner_type !== "strategic");
   if (!logos.length) return null;
-  return <div className="space-y-7">{strategic.length > 0 && <PartnerCarousel title="Strategic partners" partners={strategic.slice(0, 4)} fallbackHref={fallbackHref} />}{corporate.length > 0 && <PartnerCarousel title="Corporate partners" partners={corporate.slice(0, 4)} fallbackHref={fallbackHref} />}</div>;
+  const groups = [{ title: "Strategic partners", partners: strategic }, { title: "Corporate partners", partners: corporate }].filter((group) => group.partners.length > 0);
+  return <PartnerGroupSlider groups={groups} fallbackHref={fallbackHref} />;
+}
+
+function PartnerGroupSlider({ groups, fallbackHref }: { groups: Array<{ title: string; partners: Partner[] }>; fallbackHref: string }) {
+  const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const changeGroup = (direction: -1 | 1) => setActive((current) => (current + direction + groups.length) % groups.length);
+  useEffect(() => {
+    if (paused || groups.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = window.setInterval(() => setActive((current) => (current + 1) % groups.length), 5000);
+    return () => window.clearInterval(timer);
+  }, [paused, groups.length]);
+  return <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocusCapture={() => setPaused(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setPaused(false); }}><div className="mb-4 flex items-center justify-between gap-3"><p className="text-xs font-bold uppercase tracking-[0.12em] text-[var(--color-accent-dark)]" aria-live="polite">{groups[active]?.title}</p>{groups.length > 1 && <div className="flex gap-2"><button type="button" aria-label="Show previous partner group" onClick={() => changeGroup(-1)} className="grid h-9 w-9 place-items-center rounded-full border border-[var(--color-line)] text-lg transition-colors hover:border-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"><span aria-hidden="true">←</span></button><button type="button" aria-label="Show next partner group" onClick={() => changeGroup(1)} className="grid h-9 w-9 place-items-center rounded-full border border-[var(--color-line)] text-lg transition-colors hover:border-[var(--color-ink)] hover:bg-[var(--color-ink)] hover:text-white"><span aria-hidden="true">→</span></button></div>}</div><div className="overflow-hidden"><div className="flex transition-transform duration-500 ease-out motion-reduce:transition-none" style={{ transform: `translateX(-${active * 100}%)` }}>{groups.map((group) => <ul key={group.title} aria-label={group.title} className="grid w-full shrink-0 grid-cols-2 gap-4 sm:grid-cols-4">{group.partners.slice(0, 4).map((item) => { const alt = typeof item.metadata.alt_text === "string" && item.metadata.alt_text.trim() ? item.metadata.alt_text : item.title || "Partner logo"; const href = webUrl(item.href) || webUrl(fallbackHref); const logo = <Image src={webUrl(item.image_url)} alt={alt} width={240} height={120} unoptimized className="h-16 w-full object-contain sm:h-20" />; const tile = "flex min-h-24 items-center justify-center rounded-lg border border-[var(--color-line)] bg-white p-4"; return <li key={item.id}>{href ? <Link href={href} aria-label={item.title || alt} className={tile + " transition-colors hover:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-ink)]"}>{logo}</Link> : <div className={tile}>{logo}</div>}</li>; })}</ul>)}</div></div></div>;
 }
 
 export function PartnersShowcase() {
