@@ -12,7 +12,7 @@ import { HomepageWhatsApp } from "@/components/content/HomepageWhatsApp";
 import { HomepagePartnerLogos } from "@/components/content/PartnerLogos";
 import { HeroCarousel, type HeroSlide } from "@/components/ui/HeroCarousel";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { membershipCategories, newsItems, trainingProgrammes } from "@/data/site";
+import { events, membershipCategories, newsItems } from "@/data/site";
 import { ContentItem, ContentPage, ContentSection, getPublishedContentItems, getPublishedContentPage } from "@/lib/api/content";
 import { KnowledgeDocument, knowledgeDocumentsFromPage, knowledgeSources } from "@/lib/knowledge-documents";
 
@@ -39,7 +39,7 @@ const fallbackItems: HomepageItems = {
     },
   ],
   membership: membershipCategories.map((item, index) => ({ id: `fallback-membership-${index}`, title: item.title, summary: item.description, href: item.href, image_url: "", sort_order: index + 1, metadata: { display_meta: item.meta || "" } })),
-  training: trainingProgrammes.map((item, index) => ({ id: `fallback-training-${index}`, title: item.title, summary: item.description, href: item.href, image_url: "", sort_order: index + 1, metadata: { display_meta: item.date || "", detail: item.meta || "" } })),
+  training: events.map((item, index) => ({ id: `fallback-event-${index}`, title: item.title, summary: item.description, href: item.href, image_url: "", sort_order: index + 1, metadata: { display_meta: item.date || "", detail: item.meta || "" } })),
   knowledge: [],
   news: newsItems.map((item, index) => ({ id: `fallback-news-${index}`, title: item.title, summary: item.description, href: item.href, image_url: index === 0 ? "/images/leadership-forum.png" : "", sort_order: index + 1, metadata: { display_meta: [item.category, item.date].filter(Boolean).join(" · "), alt_text: "Leadership forum participants" } })),
   partners: [],
@@ -77,6 +77,21 @@ function asHomepageNewsItems(articles: CmsPublicArticle[]): HomepageItem[] {
     sort_order: index,
     metadata: {
       display_meta: [article.category?.name, article.published_at ? new Date(article.published_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""].filter(Boolean).join(" · "),
+      alt_text: article.revision.cover_media?.alt_text || article.revision.title,
+    },
+  }));
+}
+
+function asHomepageEventItems(articles: CmsPublicArticle[]): HomepageItem[] {
+  return articles.map((article, index) => ({
+    id: article.id,
+    title: article.revision.title,
+    summary: article.revision.standfirst,
+    href: `/events/${article.slug}`,
+    image_url: article.revision.cover_media?.file_url || "",
+    sort_order: index,
+    metadata: {
+      display_meta: [article.category?.name, article.published_at ? new Date(article.published_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : ""].filter(Boolean).join(" Â· "),
       alt_text: article.revision.cover_media?.alt_text || article.revision.title,
     },
   }));
@@ -157,6 +172,13 @@ export function HomepageContent({ revision, initialKnowledgeItems = [], initialK
       void getPublishedCmsArticles("news").then((articles) => {
         if (!cancelled && articles.length) setItems((current) => ({ ...current, news: asHomepageNewsItems(articles).slice(0, 3) }));
       }).catch(() => undefined);
+      void getPublishedCmsArticles("event").then((articles) => {
+        if (cancelled) return;
+        if (articles.length) { setItems((current) => ({ ...current, training: asHomepageEventItems(articles).slice(0, 3) })); return; }
+        void getPublishedContentItems("events").then((events) => {
+          if (!cancelled) setItems((current) => ({ ...current, training: events.slice(0, 3) }));
+        }).catch(() => undefined);
+      }).catch(() => undefined);
       void Promise.allSettled(knowledgeSources.map(async (source) => knowledgeDocumentsFromPage(source, await getPublishedCmsPage(source.slug)))).then((results) => {
         if (cancelled) return;
         const documents = results.flatMap((result) => result.status === "fulfilled" ? result.value : []);
@@ -174,7 +196,7 @@ export function HomepageContent({ revision, initialKnowledgeItems = [], initialK
     const name = String(section.data.home_section || "");
     const data = section.data;
     const entry = name as HomepageSection;
-    if (entry !== "knowledge" && entry !== "news" && Array.isArray(data.items) && sections.includes(entry)) items[entry] = data.items.map((value, index) => {
+    if (entry !== "knowledge" && entry !== "news" && entry !== "training" && Array.isArray(data.items) && sections.includes(entry)) items[entry] = data.items.map((value, index) => {
       const item = value as Record<string, unknown>;
       return { id: String(item.id || index), title: String(item.title || ""), summary: String(item.description || ""), href: String(item.href || (name === "partners" ? "" : "/")), image_url: String(item.image_url || ""), sort_order: index, metadata: (item.metadata || {}) as Record<string, unknown> };
     });
