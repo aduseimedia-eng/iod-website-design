@@ -31,6 +31,7 @@ const { ArticlePage } = load(path.join(root, "src/components/cms/ArticlePage"));
 const { HomepageContent } = load(path.join(root, "src/components/content/HomepageContent"));
 const { PartnerLogos } = load(path.join(root, "src/components/content/PartnerLogos"));
 const { default: MembershipDetail } = load(path.join(root, "src/app/membership/[slug]/page"));
+const { default: EventsPage } = load(path.join(root, "src/app/events/page"));
 const revision = {
   title: "Updated member register", eyebrow: "Current membership", summary: "The saved register introduction",
   body: "", sections: [{ slot: "hero_image", data: { image_url: "/images/updated-hero.png" }, is_enabled: true }],
@@ -94,4 +95,15 @@ test("Homepage upcoming events label and heading link to the Events page", () =>
     assert.match(html, /<a[^>]*href="\/events"[^>]*>Explore all events /);
     assert.match(html, /href="\/events\/[^"/]+"[^>]*>View event /);
   }
+});
+
+test("Events page uses the published event feed instead of stale page-copy values", () => {
+  const html = renderToStaticMarkup(React.createElement(CmsPageContext.Provider, { value: { slug: "events-page", revision: {
+    sections: [{ slot: "page_copy", data: { fields: [
+      { key: "coldlq", label: "Heading", value: "Stale event title" },
+      { key: "5eq4ga", label: "Text", value: "Stale event summary" },
+    ] } }],
+  } } }, React.createElement(EventsPage)));
+  assert.match(html, /National Corporate Governance Conference/);
+  assert.doesNotMatch(html, /Stale event title|Stale event summary/);
 });
