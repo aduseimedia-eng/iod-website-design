@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
+from django.views.decorators.cache import never_cache
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
@@ -24,6 +25,7 @@ from .models import User
 from .serializers import EmailTokenSerializer, LoginSerializer, PasswordChangeSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, RegistrationSerializer, UserSerializer
 from .services import send_password_reset_email, send_verification_email
 from .tokens import password_reset_token_generator, verification_token_generator
+from .throttling import LoginAccountThrottle
 
 
 def token_user(uid: str, token: str, *, generator) -> User:
@@ -38,6 +40,7 @@ def token_user(uid: str, token: str, *, generator) -> User:
 
 
 @extend_schema(responses={200: dict})
+@never_cache
 @ensure_csrf_cookie
 @api_view(["GET"])
 def csrf(request):
@@ -61,9 +64,10 @@ class RegisterView(APIView):
 
 
 @method_decorator(csrf_protect, name="dispatch")
+@method_decorator(never_cache, name="dispatch")
 class LoginView(APIView):
     permission_classes = [AllowAny]
-    throttle_classes = [ScopedRateThrottle]
+    throttle_classes = [ScopedRateThrottle, LoginAccountThrottle]
     throttle_scope = "login"
 
     @extend_schema(request=LoginSerializer, responses={200: UserSerializer})
@@ -91,6 +95,7 @@ class LogoutView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@method_decorator(never_cache, name="dispatch")
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 

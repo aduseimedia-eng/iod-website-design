@@ -33,8 +33,20 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.EmailField()
+    email = serializers.EmailField(required=False)
+    identifier = serializers.CharField(max_length=255, required=False)
     password = serializers.CharField(trim_whitespace=False, write_only=True)
+
+    def validate(self, data):
+        identifier = data.get("identifier") or data.get("email")
+        if not identifier:
+            raise serializers.ValidationError("Email or membership number is required.")
+        if "@" not in identifier:
+            from apps.membership.models import MemberProfile
+            member = MemberProfile.objects.filter(membership_number__iexact=identifier).select_related("user").first()
+            identifier = member.user.email if member and member.user else ""
+        data["email"] = identifier.strip().lower()
+        return data
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):

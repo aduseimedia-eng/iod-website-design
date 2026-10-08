@@ -23,6 +23,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 urlpatterns = [
     path("api/v1/", include("apps.common.urls")),
     path("api/v1/auth/", include("apps.accounts.urls")),
+    path("api/v1/", include("apps.examinations.urls")),
     path("api/v1/membership/", include("apps.membership.urls")),
     path("api/v1/content/", include("apps.content.urls")),
     path("api/v2/cms/", include("apps.content.cms_urls")),

@@ -1,11 +1,12 @@
 import { BuiltInSection } from "@/components/cms/BuiltInSection";
+import { redirect } from "next/navigation";
+import { examinationPortalUrl } from "@/lib/examinationPortal";
 
 
 import { EditableCopy } from "@/components/cms/EditableCopy";
 import { notFound } from "next/navigation";
 import { EditableImage as Image } from "@/components/cms/EditableCopy";
 import { Button } from "@/components/ui/Button";
-import { ExamAssessmentPreview } from "@/components/training/ExamAssessmentPreview";
 import { CpdVideoLibrary } from "@/components/training/CpdVideoLibrary";
 import { CpdMonthlySeminars } from "@/components/training/CpdMonthlySeminars";
 import { TrainingHero } from "@/components/training/TrainingHero";
@@ -162,56 +163,6 @@ function CorporateGovernanceTraining() {
           </div>
         </div>
       </BuiltInSection>
-    </>
-  );
-}
-
-function ExamsPortalContent() {
-  const resources = [
-    [
-      "Examination timetable",
-      "Dates and session details will be published here.",
-    ],
-    [
-      "Candidate guidance",
-      "Requirements, preparation guidance and examination rules.",
-    ],
-    ["Results and notices", "Official updates for examination candidates."],
-  ];
-  return (
-    <>
-      <BuiltInSection sectionId="exam-introduction" className="bg-white py-20 sm:py-28">
-        <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
-          <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
-            <p className="eyebrow"><EditableCopy label="Text" fallback={"Candidate information"} /></p>
-            <h2 className="mt-5 max-w-sm font-serif text-[clamp(2.5rem,3.7vw,4.25rem)] leading-[1.03] tracking-[-0.05em]"><EditableCopy label="Heading" fallback={"Everything for your examination journey."} /></h2>
-          </div>
-          <div className="lg:col-span-7 lg:col-start-6">
-            <p className="max-w-3xl font-serif text-[clamp(1.8rem,2.7vw,2.75rem)] leading-[1.2] tracking-[-0.035em] text-[var(--color-ink)]"><EditableCopy label="Text" fallback={"Find the information you need before, during and after an IoD-Gh examination."} /></p>
-            <div className="mt-10 border-t border-[var(--color-ink)]">
-              {resources.map(([title, description], index) => (
-                <div
-                  className="grid gap-4 border-b border-[var(--color-line)] py-7 sm:grid-cols-[64px_1fr]"
-                  key={title}
-                >
-                  <span className="font-serif text-2xl text-[var(--color-accent-dark)]">
-                    0{index + 1}
-                  </span>
-                  <div>
-                    <h3 className="font-serif text-2xl tracking-[-0.03em] text-[var(--color-ink)]"><EditableCopy label="Heading" fallback={String(title ?? "")} /></h3>
-                    <p className="mt-3 leading-7 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={String(description ?? "")} /></p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-10 border-l-2 border-[var(--color-accent)] bg-[var(--color-paper)] p-6 sm:p-8">
-              <p className="font-serif text-2xl tracking-[-0.03em] text-[var(--color-ink)]"><EditableCopy label="Text" fallback={"Candidate workspace preview."} /></p>
-              <p className="mt-3 leading-7 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={"Explore the candidate assessment flow below. Secure candidate access, answer storage and official results will be connected once the examinations backend is approved and delivered."} /></p>
-            </div>
-          </div>
-        </div>
-      </BuiltInSection>
-      <ExamAssessmentPreview />
     </>
   );
 }
@@ -402,6 +353,7 @@ export default async function TrainingDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (slug === "exams") redirect(examinationPortalUrl);
   const programme = trainingProgrammes.find((item) => item.href.endsWith(slug));
   const category = categoryCopy[slug];
   if (!programme && !category) notFound();
@@ -410,7 +362,6 @@ export default async function TrainingDetail({
   const corporateGovernance =
     slug === "professional" || slug === "corporate-governance-for-directors";
   const cpd = slug === "cpd";
-  const exams = slug === "exams";
 
   return (
     <>
@@ -420,7 +371,7 @@ export default async function TrainingDetail({
         description={description}
         slug={slug}
       >
-        {!cpd && !exams && (
+        {!cpd && (
           <Button
             href="#register"
             variant="secondary"
@@ -432,8 +383,6 @@ export default async function TrainingDetail({
         <CorporateGovernanceTraining />
       ) : cpd ? (
         <CPDContent />
-      ) : exams ? (
-        <ExamsPortalContent />
       ) : (
         <BuiltInSection sectionId="programme-overview" className="bg-white py-20 sm:py-28">
           <div className="site-container grid gap-12 lg:grid-cols-12">

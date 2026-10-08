@@ -14,23 +14,21 @@ export class ApiError extends Error {
   }
 }
 
-function csrfToken() {
-  return document.cookie.split("; ").find((item) => item.startsWith("csrftoken="))?.split("=")[1] || "";
-}
-
 export async function initialiseCsrf() {
   const response = await fetch(`${apiBaseUrl}/api/v1/auth/csrf/`, { credentials: "include" });
   if (!response.ok) throw new ApiError("We could not start a secure session. Please try again.");
+  const payload = await response.json() as { csrfToken: string };
+  return payload.csrfToken;
 }
 
 export async function apiRequestAt<T>(path: string, options: RequestInit = {}): Promise<T> {
   const method = options.method?.toUpperCase() || "GET";
   const needsCsrf = !["GET", "HEAD", "OPTIONS"].includes(method);
-  if (needsCsrf) await initialiseCsrf();
+  const csrfToken = needsCsrf ? await initialiseCsrf() : "";
 
   const headers = new Headers(options.headers);
   if (options.body && !headers.has("Content-Type") && !(options.body instanceof FormData)) headers.set("Content-Type", "application/json");
-  if (needsCsrf) headers.set("X-CSRFToken", csrfToken());
+  if (needsCsrf) headers.set("X-CSRFToken", csrfToken);
 
   const response = await fetch(`${apiBaseUrl}${path}`, { ...options, method, headers, credentials: "include" });
   if (response.status === 204) return undefined as T;

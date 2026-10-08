@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.content",
     "apps.membership",
+    "apps.examinations",
 ]
 
 MIDDLEWARE = [
@@ -104,12 +105,17 @@ REST_FRAMEWORK = {
     "NUM_PROXIES": 0,
     "DEFAULT_THROTTLE_RATES": {
         "login": "5/min",
+        "login_account": "20/hour",
         "registration": "3/hour",
         "password_reset": "5/hour",
         "email_verification": "5/hour",
         "membership_application": "5/hour",
         "contact_enquiry": "5/hour",
         "analytics_visit": "120/min",
+        "exam_read": "180/min",
+        "exam_write": "120/min",
+        "exam_start": "10/min",
+        "exam_admin": "120/min",
     },
 }
 
@@ -134,6 +140,8 @@ CLAMAV_HOST = os.getenv("CLAMAV_HOST", "")
 CLAMAV_PORT = int(os.getenv("CLAMAV_PORT", "3310"))
 UPLOAD_SCAN_REQUIRED = False  # Production overrides this unconditionally.
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
+EXAM_PORTAL_URL = os.getenv("EXAM_PORTAL_URL", "https://exam.iodghana.org")
+EXAM_EMAIL_NOTIFICATIONS = os.getenv("EXAM_EMAIL_NOTIFICATIONS", "false").lower() == "true"
 ADMIN_ENABLED = os.getenv("DJANGO_ENABLE_ADMIN", "false").lower() == "true"
 
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@example.invalid")

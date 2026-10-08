@@ -113,6 +113,14 @@ class CMSPublicPageSerializer(serializers.ModelSerializer):
     revision = CMSPageRevisionSerializer(source="published_revision", read_only=True)
     published_at = serializers.DateTimeField(source="published_revision.published_at", read_only=True)
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if data.get("revision"):
+            # Retire the former browser-graded practice assessment. Real exam
+            # questions and keys are available only through examinations APIs.
+            data["revision"]["sections"] = [section for section in data["revision"]["sections"] if section["section_type"] != "exam_assessment"]
+        return data
+
     class Meta:
         model = CMSPage
         fields = ("id", "path", "slug", "template_key", "revision", "published_at")

@@ -39,10 +39,13 @@ def client_address(request):
 class ScopedRateThrottle(DRFScopedRateThrottle):
     """Atomic PostgreSQL counters shared by all workers (not process-local cache)."""
 
+    def get_identity(self, request):
+        return client_address(request)
+
     def allow_request(self, request, view):
         from .models import RateLimitBucket
 
-        self.scope = getattr(view, self.scope_attr, None)
+        self.scope = getattr(self, "fixed_scope", None) or getattr(view, self.scope_attr, None)
         if not self.scope:
             return True
         self.rate = self.get_rate()
@@ -50,7 +53,7 @@ class ScopedRateThrottle(DRFScopedRateThrottle):
             return True
         self.num_requests, self.duration = self.parse_rate(self.rate)
         self.now = self.timer()
-        key = salted_hmac("iod.rate-limit.v1", f"{self.scope}:{client_address(request)}", algorithm="sha256").hexdigest()
+        key = salted_hmac("iod.rate-limit.v1", f"{self.scope}:{self.get_identity(request)}", algorithm="sha256").hexdigest()
         expires = datetime.fromtimestamp(self.now + self.duration, tz=timezone.utc)
         with transaction.atomic():
             bucket, _ = RateLimitBucket.objects.select_for_update().get_or_create(

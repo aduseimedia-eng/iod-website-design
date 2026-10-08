@@ -130,7 +130,6 @@ test("CMS actual static pages honor every registered built-in section control", 
     ["/membership/categories", "membership/[slug]/page", "categories"],
     ["/training/professional", "training/[slug]/page", "professional"],
     ["/training/cpd", "training/[slug]/page", "cpd"],
-    ["/training/exams", "training/[slug]/page", "exams"],
     ["/media/event-gallery", "media/event-gallery/page"],
     ["/services/board-evaluation", "services/[slug]/page", "board-evaluation"],
   ];
@@ -145,6 +144,17 @@ test("CMS actual static pages honor every registered built-in section control", 
 test("CMS empty homepage remains empty after the last section is removed", () => {
   const html = renderToStaticMarkup(React.createElement(CmsRevisionRenderer, { templateKey: "home", revision: { ...revision, sections: [] } }));
   assert.equal(html, "<main></main>");
+});
+
+test("Existing Examinations navigation launches the separate app without duplication", async () => {
+  const { navigation } = load(path.join(root, "src/data/navigation"));
+  const { examinationPortalUrl, examinationHref } = load(path.join(root, "src/lib/examinationPortal"));
+  const links = navigation.flatMap((item) => item.children || []);
+  assert.equal(links.filter((item) => item.href === examinationPortalUrl).length, 1);
+  assert.equal(examinationHref("/training/exams"), examinationPortalUrl);
+  assert.equal(examinationHref("/training/cpd"), "/training/cpd");
+  const { default: TrainingDetail } = load(path.join(root, "src/app/training/[slug]/page"));
+  await assert.rejects(TrainingDetail({ params: Promise.resolve({ slug: "exams" }) }), (error) => error.digest?.includes(examinationPortalUrl));
 });
 
 test("Members in Good Standing renders CMS hero fields and selected image", async () => {

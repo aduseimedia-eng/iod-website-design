@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { navigation as defaultNavigation } from "@/data/navigation";
 import { CmsNavigationItem, getPublishedCmsMenu } from "@/lib/api/cms";
+import { examinationHref } from "@/lib/examinationPortal";
 
 type HeaderLink = { label: string; href: string; newTab?: boolean; children?: Array<{ label: string; href: string; description?: string; newTab?: boolean }> };
 const homeLink: HeaderLink = { label: "Home", href: "/" };
@@ -18,9 +19,9 @@ function asHeaderLinks(items: CmsNavigationItem[]): HeaderLink[] {
   const enabled = items.filter((item) => item.is_enabled);
   return enabled.filter((item) => !item.parent_id).map((item) => ({
     label: item.label,
-    href: item.href || "/",
+    href: examinationHref(item.href || "/"),
     newTab: item.open_in_new_tab,
-    children: enabled.filter((child) => child.parent_id === item.id).map((child) => ({ label: child.label, href: child.href || "/", newTab: child.open_in_new_tab })),
+    children: enabled.filter((child) => child.parent_id === item.id).map((child) => ({ label: child.label, href: examinationHref(child.href || "/"), newTab: child.open_in_new_tab })),
   }));
 }
 

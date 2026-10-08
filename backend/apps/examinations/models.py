@@ -1,0 +1,145 @@
+import uuid
+
+from django.conf import settings
+from django.db import models
+from django.db.models import Q
+
+
+class Question(models.Model):
+    """Each row is an immutable question revision; edits create a new row."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lineage = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True)
+    version = models.PositiveIntegerField(default=1)
+    text = models.TextField()
+    question_type = models.CharField(max_length=20, default="MULTIPLE_CHOICE")
+    marks = models.DecimalField(max_digits=7, decimal_places=2, default=1)
+    explanation = models.TextField(blank=True)
+    category = models.CharField(max_length=150, blank=True)
+    difficulty = models.CharField(max_length=20, default="MEDIUM")
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["lineage", "version"], name="exam_question_revision"), models.CheckConstraint(condition=Q(marks__gt=0), name="exam_positive_marks")]
+
+
+class QuestionOption(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    question = models.ForeignKey(Question, on_delete=models.PROTECT, related_name="options")
+    text = models.TextField()
+    position = models.PositiveIntegerField()
+    is_correct = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [models.UniqueConstraint(fields=["question", "position"], name="exam_option_position"), models.UniqueConstraint(fields=["question"], condition=Q(is_correct=True), name="exam_single_correct_option")]
+
+
+class Exam(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=False)
+    current_version = models.ForeignKey("ExamVersion", null=True, blank=True, on_delete=models.PROTECT, related_name="current_for")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ExamVersion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    exam = models.ForeignKey(Exam, on_delete=models.PROTECT, related_name="versions")
+    number = models.PositiveIntegerField()
+    # Immutable configuration and question snapshots; never serialized wholesale
+    # to a student. Existing attempts cannot be changed by editing the bank.
+    configuration = models.JSONField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["exam", "number"], name="exam_version_number")]
+
+
+class ExamQuestion(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    version = models.ForeignKey(ExamVersion, on_delete=models.PROTECT, related_name="questions")
+    question = models.ForeignKey(Question, on_delete=models.PROTECT)
+    position = models.PositiveIntegerField()
+    snapshot = models.JSONField()
+
+    class Meta:
+        ordering = ["position"]
+        constraints = [models.UniqueConstraint(fields=["version", "question"], name="exam_version_question"), models.UniqueConstraint(fields=["version", "position"], name="exam_version_position")]
+
+
+class ExamEligibility(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.PROTECT, related_name="eligibilities")
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    is_active = models.BooleanField(default=True)
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="exam_assignments")
+    assigned_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["exam", "student"], name="exam_student_eligibility")]
+
+
+class ExamAttempt(models.Model):
+    class Status(models.TextChoices):
+        IN_PROGRESS = "IN_PROGRESS"
+        SUBMITTED = "SUBMITTED"
+        EXPIRED = "EXPIRED"
+        CANCELLED = "CANCELLED"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    exam = models.ForeignKey(Exam, on_delete=models.PROTECT, related_name="attempts")
+    exam_version = models.ForeignKey(ExamVersion, on_delete=models.PROTECT)
+    attempt_number = models.PositiveIntegerField()
+    started_at = models.DateTimeField()
+    expires_at = models.DateTimeField(db_index=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.IN_PROGRESS, db_index=True)
+    question_order = models.JSONField()
+    option_order = models.JSONField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["student", "exam"], condition=Q(status="IN_PROGRESS"), name="exam_one_active_attempt"),
+            models.UniqueConstraint(fields=["student", "exam", "attempt_number"], name="exam_attempt_number"),
+            models.CheckConstraint(condition=Q(attempt_number__gte=1), name="exam_attempt_positive"),
+            models.CheckConstraint(condition=Q(expires_at__gt=models.F("started_at")), name="exam_attempt_time_window"),
+        ]
+
+
+class ExamAnswer(models.Model):
+    attempt = models.ForeignKey(ExamAttempt, on_delete=models.PROTECT, related_name="answers")
+    question = models.ForeignKey(ExamQuestion, on_delete=models.PROTECT)
+    selected_option = models.UUIDField()
+    revision = models.PositiveIntegerField(default=1)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["attempt", "question"], name="exam_answer_once")]
+
+
+class ExamResult(models.Model):
+    attempt = models.OneToOneField(ExamAttempt, on_delete=models.PROTECT, related_name="result")
+    score = models.DecimalField(max_digits=12, decimal_places=2)
+    total_marks = models.DecimalField(max_digits=12, decimal_places=2)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    grade = models.CharField(max_length=20)
+    passed = models.BooleanField()
+    released_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    released_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.CheckConstraint(condition=Q(score__gte=0) & Q(score__lte=models.F("total_marks")) & Q(total_marks__gt=0), name="exam_valid_score")]
+
+
+class ExamAuditLog(models.Model):
+    exam = models.ForeignKey(Exam, null=True, on_delete=models.PROTECT)
+    attempt = models.ForeignKey(ExamAttempt, null=True, on_delete=models.PROTECT)
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.PROTECT)
+    event = models.CharField(max_length=60, db_index=True)
+    timestamp = models.DateTimeField(auto_now_add=True, db_index=True)
+    metadata = models.JSONField(default=dict)
+    # Intentionally no answer content, raw IP addresses or device fingerprinting.

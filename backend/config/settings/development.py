@@ -10,3 +10,5 @@ if not os.getenv("EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 CORS_ALLOWED_ORIGINS = CORS_ALLOWED_ORIGINS or ["http://localhost:3000", "http://127.0.0.1:3000"]  # noqa: F405
 CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS or ["http://localhost:3000", "http://127.0.0.1:3000"]  # noqa: F405
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys([*CORS_ALLOWED_ORIGINS, "http://localhost:3001", "http://127.0.0.1:3001"]))
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys([*CSRF_TRUSTED_ORIGINS, "http://localhost:3001", "http://127.0.0.1:3001"]))

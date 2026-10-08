@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "exam:dev": "next dev apps/exam-portal -p 3001",
+    "exam:build": "next build apps/exam-portal",
+    "exam:start": "next start apps/exam-portal -p 3001",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

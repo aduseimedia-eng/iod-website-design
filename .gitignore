@@ -18,6 +18,8 @@
 
 # next.js
 /.next/
+apps/exam-portal/.next/
+apps/exam-portal/node_modules/
 /out/
 
 # production

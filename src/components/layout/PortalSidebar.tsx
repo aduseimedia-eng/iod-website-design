@@ -9,6 +9,7 @@ const memberLinks = ["dashboard", "my-profile", "membership", "events", "trainin
 const groups = [
   { title: "Content", links: [["Pages", "/admin/content"], ["News", "/admin/news"]] },
   { title: "Media", links: [["Media Library", "/admin/media"]] },
+  { title: "Examinations", links: [["Examinations", "/admin/examinations"]] },
   { title: "Website", links: [["Navigation", "/admin/navigation"], ["Analytics", "/admin/analytics"], ["Settings", "/admin/settings"]] },
   { title: "Membership", links: [["Members", "/admin/members"], ["Applications", "/admin/applications"], ["Directory", "/admin/directory"]] },
 ];
