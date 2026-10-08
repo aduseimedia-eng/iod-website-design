@@ -1,3 +1,5 @@
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
 
 import { EditableCopy } from "@/components/cms/EditableCopy";
 import { notFound } from "next/navigation";
@@ -112,7 +114,7 @@ export default async function AboutDetail({
 
       {isVisionMission ? (
         <>
-          <section className="bg-white py-20 sm:py-28">
+          <BuiltInSection sectionId="vision-mission" className="bg-white py-20 sm:py-28">
             <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-4">
                 <p className="eyebrow"><EditableCopy label="Text" fallback={"Our direction"} /></p>
@@ -130,9 +132,9 @@ export default async function AboutDetail({
                 ))}
               </div>
             </div>
-          </section>
+          </BuiltInSection>
 
-          <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+          <BuiltInSection sectionId="values" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
             <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
               <div className="lg:col-span-4">
                 <p className="eyebrow"><EditableCopy label="Text" fallback={"Our core values"} /></p>
@@ -155,11 +157,11 @@ export default async function AboutDetail({
                 ))}
               </div>
             </div>
-          </section>
+          </BuiltInSection>
         </>
       ) : isCouncil ? (
         <ProfilePhotosProvider pageSlug="about-council">
-        <section className="bg-white py-20 sm:py-28">
+        <BuiltInSection sectionId="council" className="bg-white py-20 sm:py-28">
           <div className="site-container">
             <div className="grid gap-8 border-b border-[var(--color-line)] pb-12 lg:grid-cols-12 lg:items-end">
               <div className="lg:col-span-7">
@@ -178,11 +180,11 @@ export default async function AboutDetail({
               </div>
             </div>
           </div>
-        </section>
+        </BuiltInSection>
         </ProfilePhotosProvider>
       ) : isSecretariat ? (
         <>
-          <section className="bg-white py-20 sm:py-28">
+          <BuiltInSection sectionId="secretariat-introduction" className="bg-white py-20 sm:py-28">
             <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
               <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
                 <p className="eyebrow"><EditableCopy label="Text" fallback={"How we work"} /></p>
@@ -197,18 +199,18 @@ export default async function AboutDetail({
                 ))}
               </div>
             </div>
-          </section>
+          </BuiltInSection>
           <SecretariatGrid />
         </>
       ) : isPartners ? (
         <>
-          <section className="bg-white py-20 sm:py-28">
+          <BuiltInSection sectionId="partners-introduction" className="bg-white py-20 sm:py-28">
             <div className="site-container"><div className="mx-auto max-w-3xl text-center"><p className="eyebrow"><EditableCopy label="Text" fallback={"Our partners"} /></p><h2 className="mt-5 font-serif text-[clamp(2.5rem,4vw,4.35rem)] leading-[1.03] tracking-[-0.05em]"><EditableCopy label="Heading" fallback={"Partnerships that strengthen our impact."} /></h2><div className="mt-8 space-y-5 text-lg leading-8 text-[var(--color-slate)]">{sections.partners.map((text) => <p key={text}><EditableCopy label="Text" fallback={text} /></p>)}</div></div></div>
-          </section>
-          <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28"><div className="site-container"><PartnersShowcase /></div></section>
+          </BuiltInSection>
+          <BuiltInSection sectionId="partner-logos" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28"><div className="site-container"><PartnersShowcase /></div></BuiltInSection>
         </>
       ) : (
-        <section className="bg-white py-20 sm:py-28">
+        <BuiltInSection sectionId="about-story" className="bg-white py-20 sm:py-28">
           <div className="site-container grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-4">
               <p className="eyebrow">
@@ -233,7 +235,7 @@ export default async function AboutDetail({
               )}
             </div>
           </div>
-        </section>
+        </BuiltInSection>
       )}
     </>
   );

@@ -1,5 +1,8 @@
 "use client";
 
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
+
 import { CmsHeroImage } from "@/components/cms/HeroImage";
 
 import Link from "next/link";
@@ -28,7 +31,7 @@ export function KnowledgeHero({
 }: KnowledgeHeroProps) {
   const page = useCmsPage(active === "all" ? "knowledge-page" : `knowledge-${active}`, { eyebrow, title, summary: description, body: "", blocks: [] });
   return (
-    <section className="relative isolate relative overflow-hidden bg-[var(--color-ink)] text-white"><CmsHeroImage />
+    <BuiltInSection sectionId="hero" className="relative isolate relative overflow-hidden bg-[var(--color-ink)] text-white"><CmsHeroImage />
       <div className="absolute inset-y-0 right-[12%] w-px bg-white/15" />
       <div className="absolute inset-y-0 right-[29%] w-px bg-white/10" />
       <p className="pointer-events-none absolute -bottom-16 -right-4 font-serif text-[clamp(11rem,25vw,27rem)] leading-none tracking-[-0.13em] text-white/[0.045]">
@@ -74,6 +77,6 @@ export function KnowledgeHero({
           ))}
         </div>
       </div>
-    </section>
+    </BuiltInSection>
   );
 }

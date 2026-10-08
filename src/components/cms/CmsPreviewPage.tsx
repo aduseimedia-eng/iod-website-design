@@ -27,5 +27,5 @@ export function CmsPreviewPage() {
   if (!revisionId || !token) return <main className="grid min-h-screen place-items-center bg-[var(--color-warm-white)] p-8"><p className="border-l-2 border-[var(--color-error)] bg-red-50 p-5 text-sm">This preview link is incomplete.</p></main>;
   if (error) return <main className="grid min-h-screen place-items-center bg-[var(--color-warm-white)] p-8"><p className="border-l-2 border-[var(--color-error)] bg-red-50 p-5 text-sm">{error}</p></main>;
   if (!page) return <main className="grid min-h-screen place-items-center bg-[var(--color-warm-white)]"><p className="text-sm font-bold text-[var(--color-slate)]">Loading preview…</p></main>;
-  return <><div className="bg-amber-100 p-3 text-center text-sm">Private preview</div><CmsRevisionRenderer revision={page.revision} /></>;
+  return <><div className="bg-amber-100 p-3 text-center text-sm">Private preview</div><CmsRevisionRenderer revision={page.revision} templateKey={page.template_key} /></>;
 }

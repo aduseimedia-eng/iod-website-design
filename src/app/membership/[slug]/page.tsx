@@ -1,3 +1,5 @@
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
 
 import { EditableCopy } from "@/components/cms/EditableCopy";
 import { CmsPageText } from "@/components/content/useCmsContent";
@@ -63,7 +65,7 @@ export function generateStaticParams() {
 function MembershipFees() {
   return (
     <>
-      <section className="bg-white py-20 sm:py-28">
+      <BuiltInSection sectionId="membership-fees" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Individual membership"} /></p>
@@ -145,8 +147,8 @@ function MembershipFees() {
             ))}
           </div>
         </div>
-      </section>
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="membership-payment" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
         <div className="site-container">
           <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-7">
@@ -189,7 +191,7 @@ function MembershipFees() {
             ))}
           </div>
         </div>
-      </section>
+      </BuiltInSection>
     </>
   );
 }
@@ -211,7 +213,7 @@ export default async function MembershipDetail({
   return (
     <>
       {directory ? (
-        <section className="relative isolate overflow-hidden bg-[var(--color-ink)] text-white">
+        <BuiltInSection sectionId="hero" className="relative isolate overflow-hidden bg-[var(--color-ink)] text-white">
           <CmsHeroImage />
           <div className="absolute inset-y-0 right-[12%] w-px bg-white/15" />
           <div className="absolute inset-y-0 right-[28%] w-px bg-white/10" />
@@ -248,19 +250,19 @@ export default async function MembershipDetail({
               </div>
             </div>
           </div>
-        </section>
+        </BuiltInSection>
       ) : (
         <MembershipHero {...copy} slug={slug} />
       )}
 
       {directory ? (
         <>
-          <section className="bg-white py-20 sm:py-28">
+          <BuiltInSection sectionId="member-directory" className="bg-white py-20 sm:py-28">
             <div className="site-container">
               <MembersDirectory />
             </div>
-          </section>
-          <section className="border-t border-[var(--color-line)] bg-[var(--color-paper)] py-16 sm:py-20">
+          </BuiltInSection>
+          <BuiltInSection sectionId="previous-register" className="border-t border-[var(--color-line)] bg-[var(--color-paper)] py-16 sm:py-20">
             <div className="site-container grid gap-8 lg:grid-cols-12 lg:items-center">
               <div className="lg:col-span-7">
                 <p className="eyebrow"><EditableCopy label="Text" fallback={"Previous register"} /></p>
@@ -280,12 +282,12 @@ export default async function MembershipDetail({
                 <p className="mt-3 text-xs leading-5 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={"The approved PDF register will be uploaded here."} /></p>
               </div>
             </div>
-          </section>
+          </BuiltInSection>
         </>
       ) : fees ? (
         <MembershipFees />
       ) : (
-        <section className="bg-white py-20 sm:py-28">
+        <BuiltInSection sectionId="membership-details" className="bg-white py-20 sm:py-28">
           <div className="site-container max-w-4xl">
             {verify ? <MemberVerification /> : categories ? (
               <div className="space-y-0">
@@ -329,7 +331,7 @@ export default async function MembershipDetail({
               </div>
             )}
           </div>
-        </section>
+        </BuiltInSection>
       )}
     </>
   );

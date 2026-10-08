@@ -1,3 +1,5 @@
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
 import { notFound } from "next/navigation";
 import { ContentCard } from "@/components/cards/ContentCard";
 import { KnowledgeHero } from "@/components/knowledge/KnowledgeHero";
@@ -53,7 +55,7 @@ export default async function KnowledgeDetail({
           {...copy}
         />
       )}
-      {slug === "resources" ? <ResourcesDocuments initialPage={initialLibraryPage} /> : slug === "reports" ? <ReportsDocuments initialPage={initialLibraryPage} /> : slug === "research" ? <ResearchDocuments initialPage={initialLibraryPage} /> : <section className="bg-white py-20 sm:py-28">
+      {slug === "resources" ? <ResourcesDocuments initialPage={initialLibraryPage} /> : slug === "reports" ? <ReportsDocuments initialPage={initialLibraryPage} /> : slug === "research" ? <ResearchDocuments initialPage={initialLibraryPage} /> : <BuiltInSection sectionId="knowledge-articles" className="bg-white py-20 sm:py-28">
         <div className="site-container">
           <div className="grid gap-8 border-b border-[var(--color-line)] pb-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-7">
@@ -82,7 +84,7 @@ export default async function KnowledgeDetail({
             ))}
           </div>
         </div>
-      </section>}
+      </BuiltInSection>}
     </>
   );
 }

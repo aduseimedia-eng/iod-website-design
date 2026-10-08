@@ -1,4 +1,7 @@
 "use client";
+
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
 import { EditableCopy } from "@/components/cms/EditableCopy";
 
 
@@ -27,7 +30,7 @@ export default function AboutPage() {
   const page = useCmsPage("about-page", { eyebrow: "About IoD-Gh", title: "Professional directorship. Stronger Ghana.", summary: "IoD-Gh is Ghana's professional institute for directors, championing better boards, better leadership and better governance.", body: "", blocks: [] });
   return (
     <>
-      <section className="relative isolate min-h-[390px] overflow-hidden bg-[var(--color-ink)] text-white sm:min-h-[465px]">
+      <BuiltInSection sectionId="hero" className="relative isolate min-h-[390px] overflow-hidden bg-[var(--color-ink)] text-white sm:min-h-[465px]">
         {(!image || image.url) && <Image src={image?.url || "/images/leadership-forum.png"} alt={image?.alt || "Ghanaian leaders in discussion at an IoD-Gh forum"} unoptimized={!!image} fill priority sizes="100vw" className="object-cover object-center" />}
         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(39,27,84,0.94)_0%,rgba(39,27,84,0.78)_48%,rgba(39,27,84,0.36)_100%)]" />
         <div className="site-container relative flex min-h-[390px] items-end py-12 sm:min-h-[465px] sm:py-16 lg:py-20">
@@ -39,9 +42,9 @@ export default function AboutPage() {
             <p className="max-w-md text-lg leading-8 text-[var(--color-mist)] lg:col-span-4">{page.summary}</p>
           </div>
         </div>
-      </section>
+      </BuiltInSection>
 
-      <section className="bg-white py-20 sm:py-28">
+      <BuiltInSection sectionId="about-introduction" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Who we are"} /></p>
@@ -57,9 +60,9 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+      </BuiltInSection>
 
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+      <BuiltInSection sectionId="about-principles" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Our purpose"} /></p>
@@ -77,9 +80,9 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-      </section>
+      </BuiltInSection>
 
-      <section className="bg-white py-20 sm:py-28">
+      <BuiltInSection sectionId="about-explore" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Explore the Institute"} /></p>
@@ -97,7 +100,7 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-      </section>
+      </BuiltInSection>
     </>
   );
 }

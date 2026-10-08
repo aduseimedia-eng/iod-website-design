@@ -1,3 +1,5 @@
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
 
 import { CmsHeroImage } from "@/components/cms/HeroImage";
 import { EditableCopy } from "@/components/cms/EditableCopy";
@@ -55,7 +57,7 @@ export default async function ServiceDetail({
   if (!item || !detail) notFound();
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-[var(--color-ink)] text-white"><CmsHeroImage />
+      <BuiltInSection sectionId="hero" className="relative isolate overflow-hidden bg-[var(--color-ink)] text-white"><CmsHeroImage />
         <div className="absolute inset-y-0 right-[17%] w-px bg-white/15" />
         <div className="absolute inset-y-0 right-[34%] w-px bg-white/10" />
         <p className="pointer-events-none absolute -bottom-20 -right-4 font-serif text-[clamp(11rem,24vw,25rem)] leading-none tracking-[-0.13em] text-white/[0.045]"><EditableCopy label="Text" fallback={"IoD"} /></p>
@@ -92,8 +94,8 @@ export default async function ServiceDetail({
             </div>
           </div>
         </div>
-      </section>
-      <section className="bg-white py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="service-overview" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Our approach"} /></p>
@@ -104,8 +106,8 @@ export default async function ServiceDetail({
             <p className="mt-7 max-w-2xl leading-8 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={"Every engagement begins with the realities of your organisation. We listen closely, provide considered challenge and shape a practical response around the issues that matter."} /></p>
           </div>
         </div>
-      </section>
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="service-outcomes" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"What the service includes"} /></p>
@@ -125,8 +127,8 @@ export default async function ServiceDetail({
             ))}
           </div>
         </div>
-      </section>
-      <section className="bg-[var(--color-ink)] py-16 text-white sm:py-20">
+      </BuiltInSection>
+      <BuiltInSection sectionId="service-contact" className="bg-[var(--color-ink)] py-16 text-white sm:py-20">
         <div className="site-container grid gap-8 lg:grid-cols-12 lg:items-center">
           <div className="lg:col-span-7">
             <p className="eyebrow text-[var(--color-accent-light)]"><EditableCopy label="Text" fallback={"Start a conversation"} /></p>
@@ -142,7 +144,7 @@ export default async function ServiceDetail({
             ><EditableCopy label="Link text" fallback={"Talk to IoD-Gh"} /></Button>
           </div>
         </div>
-      </section>
+      </BuiltInSection>
     </>
   );
 }

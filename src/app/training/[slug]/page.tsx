@@ -1,3 +1,5 @@
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
 
 import { EditableCopy } from "@/components/cms/EditableCopy";
 import { notFound } from "next/navigation";
@@ -54,7 +56,7 @@ export function generateStaticParams() {
 function CorporateGovernanceTraining() {
   return (
     <>
-      <section className="bg-white py-20 sm:py-28">
+      <BuiltInSection sectionId="course-overview" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Overview"} /></p>
@@ -68,8 +70,8 @@ function CorporateGovernanceTraining() {
             </div>
           </div>
         </div>
-      </section>
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="course-objectives" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Objectives"} /></p>
@@ -89,8 +91,8 @@ function CorporateGovernanceTraining() {
             ))}
           </div>
         </div>
-      </section>
-      <section className="bg-white py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="course-audience" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Duration and flexibility"} /></p>
@@ -108,8 +110,8 @@ function CorporateGovernanceTraining() {
             ))}
           </div>
         </div>
-      </section>
-      <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="course-modules" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Faculty and target group"} /></p>
@@ -126,8 +128,8 @@ function CorporateGovernanceTraining() {
             </div>
           </div>
         </div>
-      </section>
-      <section className="bg-white py-20 sm:py-28">
+      </BuiltInSection>
+      <BuiltInSection sectionId="course-fees" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Completion and certification"} /></p>
@@ -138,8 +140,8 @@ function CorporateGovernanceTraining() {
             <p className="mt-6 text-lg leading-8 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={"A certificate of completion is issued to candidates who successfully complete the course and are admitted into membership of IoD-Gh based on individual experience. Candidates may use the designation AIoD or MIoD after their names, depending on their membership admission category, following the Induction Ceremony."} /></p>
           </div>
         </div>
-      </section>
-      <section
+      </BuiltInSection>
+      <BuiltInSection sectionId="course-registration"
         id="register"
         className="bg-[var(--color-ink)] py-20 text-white sm:py-24"
       >
@@ -159,7 +161,7 @@ function CorporateGovernanceTraining() {
             ><EditableCopy label="Link text" fallback={"Register interest"} /></Button>
           </div>
         </div>
-      </section>
+      </BuiltInSection>
     </>
   );
 }
@@ -178,7 +180,7 @@ function ExamsPortalContent() {
   ];
   return (
     <>
-      <section className="bg-white py-20 sm:py-28">
+      <BuiltInSection sectionId="exam-introduction" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"Candidate information"} /></p>
@@ -208,7 +210,7 @@ function ExamsPortalContent() {
             </div>
           </div>
         </div>
-      </section>
+      </BuiltInSection>
       <ExamAssessmentPreview />
     </>
   );
@@ -260,7 +262,7 @@ function CPDContent() {
   ];
   return (
     <>
-      <section className="bg-white py-20 sm:py-28">
+      <BuiltInSection sectionId="cpd-introduction" className="bg-white py-20 sm:py-28">
         <div className="site-container grid gap-12 lg:grid-cols-12 lg:gap-16">
           <div className="border-l-2 border-[var(--color-accent)] pl-5 lg:col-span-4 lg:self-start lg:py-2">
             <p className="eyebrow"><EditableCopy label="Text" fallback={"IoD-Gh CPD Policy"} /></p>
@@ -287,8 +289,8 @@ function CPDContent() {
             </div>
           </div>
         </div>
-      </section>
-      {false && <section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
+      </BuiltInSection>
+      {false && <BuiltInSection sectionId="unused-cpd-seminars" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28">
         <div className="site-container">
           <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-7">
@@ -341,9 +343,9 @@ function CPDContent() {
             ))}
           </div>
         </div>
-      </section>}
+      </BuiltInSection>}
       <CpdMonthlySeminars />
-      {false && <section className="bg-[var(--color-ink)] py-20 text-white sm:py-28">
+      {false && <BuiltInSection sectionId="unused-cpd-videos" className="bg-[var(--color-ink)] py-20 text-white sm:py-28">
         <div className="site-container">
           <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
             <div className="lg:col-span-7">
@@ -388,7 +390,7 @@ function CPDContent() {
             ))}
           </div>
         </div>
-      </section>}
+      </BuiltInSection>}
       <CpdVideoLibrary />
     </>
   );
@@ -433,7 +435,7 @@ export default async function TrainingDetail({
       ) : exams ? (
         <ExamsPortalContent />
       ) : (
-        <section className="bg-white py-20 sm:py-28">
+        <BuiltInSection sectionId="programme-overview" className="bg-white py-20 sm:py-28">
           <div className="site-container grid gap-12 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <h2 className="font-serif text-4xl"><EditableCopy label="Heading" fallback={"Programme overview"} /></h2>
@@ -471,7 +473,7 @@ export default async function TrainingDetail({
               <p className="mt-4 text-xs leading-5 text-[var(--color-slate)]"><EditableCopy label="Text" fallback={"Registration is a static interface in Phase 1."} /></p>
             </aside>
           </div>
-        </section>
+        </BuiltInSection>
       )}
     </>
   );

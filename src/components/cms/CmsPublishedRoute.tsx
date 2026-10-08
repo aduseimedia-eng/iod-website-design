@@ -8,11 +8,12 @@ import { CmsPageRevision } from "@/lib/api/cms";
 import { PageContent } from "./ContentRenderer";
 import { HomepageContent } from "@/components/content/HomepageContent";
 import { CmsPageContext } from "./PageContext";
+import { nativeSectionTypes } from "@/lib/cms/builtInSections";
 
 type PublishedPage = { id: string; path: string; slug: string; template_key: string; revision: CmsPageRevision };
 
-export function CmsRevisionRenderer({ revision }: { revision: CmsPageRevision }) {
-  if (revision.sections.some((section) => section.data.home_section)) return <HomepageContent revision={revision} />;
+export function CmsRevisionRenderer({ revision, templateKey }: { revision: CmsPageRevision; templateKey?: string }) {
+  if (templateKey === "home" || revision.sections.some((section) => section.data.home_section)) return <HomepageContent revision={revision} />;
   return <main className="bg-[var(--color-warm-white)]"><PageContent revision={revision} /></main>;
 }
 
@@ -31,7 +32,7 @@ export function CmsPublishedRoute({ path, fallback }: { path: string; fallback: 
   }, [path]);
 
   if (!resolved || !page) return <>{fallback}</>;
-  return <CmsRevisionRenderer revision={page.revision} />;
+  return <CmsRevisionRenderer revision={page.revision} templateKey={page.template_key} />;
 }
 
 export function CmsRouteSwitch({ children }: { children: ReactNode }) {
@@ -57,8 +58,8 @@ export function CmsRouteSwitch({ children }: { children: ReactNode }) {
 
   if (!excluded && previewError) return <p role="alert" className="p-8">{previewError}</p>;
   if (!excluded && page?.path === pathname) {
-    if (page.template_key === "legacy") return <CmsPageContext.Provider value={{ slug: page.slug, revision: page.revision }}>{previewing && <p className="bg-amber-100 p-3 text-center text-sm">Private preview</p>}{children}<PageContent revision={page.revision} sectionsOnly /></CmsPageContext.Provider>;
-    return <CmsRevisionRenderer revision={page.revision} />;
+    if (page.template_key === "legacy") return <CmsPageContext.Provider value={{ slug: page.slug, revision: page.revision }}>{previewing && <p className="bg-amber-100 p-3 text-center text-sm">Private preview</p>}{children}<PageContent revision={page.revision} sectionsOnly omitSectionTypes={nativeSectionTypes(page.path)} /></CmsPageContext.Provider>;
+    return <CmsRevisionRenderer revision={page.revision} templateKey={page.template_key} />;
   }
   return <>{children}</>;
 }

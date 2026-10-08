@@ -208,6 +208,37 @@ class RevisionedCMSApiTests(TestCase):
         self.assertEqual(self.client.get("/api/v2/cms/pages/resolve/", {"path": "/about-us"}).json()["revision"]["title"], "About IoD-Gh today")
         self.assertEqual(CMSPage.objects.get(pk=page_id).revisions.count(), 2)
 
+    def test_section_visibility_survives_draft_preview_publish_and_restore(self):
+        client = self.csrf_client(self.staff)
+        page = client.post("/api/v2/cms/staff/pages/", data=json.dumps(self.page_payload()), content_type="application/json").json()
+        page_id = page["id"]
+        self.assertEqual(client.post(f"/api/v2/cms/staff/pages/{page_id}/revisions/1/publish/").status_code, 200)
+        layout = {
+            "slot": "page_layout", "section_type": "rich_text", "position": 1,
+            "data": {"visibility": {"hero": "hidden", "body": "removed"}}, "is_enabled": True,
+        }
+        payload = self.page_payload(sections=[self.page_payload()["sections"][0], layout], base_revision_number=1)
+        saved = client.post(f"/api/v2/cms/staff/pages/{page_id}/drafts/", data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(saved.status_code, 201)
+        self.assertEqual(saved.json()["sections"][1]["data"], layout["data"])
+        live = self.client.get("/api/v2/cms/pages/resolve/", {"path": "/about-us"}).json()["revision"]
+        self.assertEqual(len(live["sections"]), 1, "Saving visibility must not publish it")
+        preview = client.post(f"/api/v2/cms/staff/pages/{page_id}/revisions/2/preview/").json()
+        private = client.get(f'/api/v2/cms/pages/preview/{preview["revision"]["id"]}/', {"token": preview["token"]})
+        self.assertEqual(private.status_code, 200)
+        self.assertEqual(private.json()["revision"]["sections"][1]["data"], layout["data"])
+        self.assertEqual(client.post(f"/api/v2/cms/staff/pages/{page_id}/revisions/2/publish/").status_code, 200)
+        live = self.client.get("/api/v2/cms/pages/resolve/", {"path": "/about-us"}).json()["revision"]
+        self.assertEqual(live["sections"][1]["data"], layout["data"])
+        self.assertEqual(live["body"], payload["body"], "Removing built-in sections must preserve their saved content")
+        layout["data"]["visibility"] = {"hero": "visible", "body": "visible"}
+        payload["base_revision_number"] = 2
+        restored = client.post(f"/api/v2/cms/staff/pages/{page_id}/drafts/", data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(restored.status_code, 201)
+        self.assertEqual(client.post(f"/api/v2/cms/staff/pages/{page_id}/revisions/3/publish/").status_code, 200)
+        live = self.client.get("/api/v2/cms/pages/resolve/", {"path": "/about-us"}).json()["revision"]
+        self.assertEqual(live["sections"][1]["data"], layout["data"])
+
     def test_staff_can_remove_a_page_but_not_a_protected_system_page(self):
         client = self.csrf_client(self.staff)
         page = client.post("/api/v2/cms/staff/pages/", data=json.dumps(self.page_payload()), content_type="application/json").json()

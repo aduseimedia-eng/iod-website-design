@@ -9,7 +9,7 @@ import { linkUrl } from "./ContentRenderer";
 export function useHeroImage() {
   const context = useContext(CmsPageContext);
   const image = context?.revision.sections.find((section) => section.slot === "hero_image");
-  return image ? { url: image.primary_media?.file_url || String(image.data.image_url || ""), alt: image.primary_media?.alt_text || "" } : null;
+  return image ? { url: image.is_enabled ? image.primary_media?.file_url || String(image.data.image_url || "") : "", alt: image.primary_media?.alt_text || "" } : null;
 }
 export function CmsHeroImage() {
   const image = useHeroImage();

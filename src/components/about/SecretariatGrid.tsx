@@ -1,5 +1,8 @@
 "use client";
 
+import { BuiltInSection } from "@/components/cms/BuiltInSection";
+
+
 import { EditableCopy } from "@/components/cms/EditableCopy";
 import { ProfilePhoto, ProfilePhotosProvider, useProfileGallery } from "@/components/about/ProfilePhotos";
 
@@ -23,5 +26,5 @@ function SecretariatProfiles() {
 }
 
 export function SecretariatGrid() {
-  return <ProfilePhotosProvider pageSlug="about-secretariat"><section className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28"><div className="site-container"><div className="grid gap-8 border-b border-[var(--color-line)] pb-12 lg:grid-cols-12 lg:items-end"><div className="lg:col-span-7"><p className="eyebrow"><EditableCopy label="Text" fallback="The Secretariat" /></p><h2 className="mt-5 max-w-3xl font-serif text-[clamp(2.5rem,4vw,4.25rem)] leading-[1.02] tracking-[-0.05em]">The people who make the Institute&apos;s work possible.</h2></div><p className="max-w-md leading-7 text-[var(--color-slate)] lg:col-span-4 lg:col-start-9"><EditableCopy label="Text" fallback="Meet the team responsible for the day-to-day delivery of IoD-Gh programmes, member services and institutional partnerships." /></p></div><SecretariatProfiles /></div></section></ProfilePhotosProvider>;
+  return <ProfilePhotosProvider pageSlug="about-secretariat"><BuiltInSection sectionId="secretariat-profiles" sectionType="profile_gallery" className="border-y border-[var(--color-line)] bg-[var(--color-paper)] py-20 sm:py-28"><div className="site-container"><div className="grid gap-8 border-b border-[var(--color-line)] pb-12 lg:grid-cols-12 lg:items-end"><div className="lg:col-span-7"><p className="eyebrow"><EditableCopy label="Text" fallback="The Secretariat" /></p><h2 className="mt-5 max-w-3xl font-serif text-[clamp(2.5rem,4vw,4.25rem)] leading-[1.02] tracking-[-0.05em]">The people who make the Institute&apos;s work possible.</h2></div><p className="max-w-md leading-7 text-[var(--color-slate)] lg:col-span-4 lg:col-start-9"><EditableCopy label="Text" fallback="Meet the team responsible for the day-to-day delivery of IoD-Gh programmes, member services and institutional partnerships." /></p></div><SecretariatProfiles /></div></BuiltInSection></ProfilePhotosProvider>;
 }

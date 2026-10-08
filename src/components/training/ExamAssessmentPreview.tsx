@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { CmsPublicPage, getPublishedCmsPage } from "@/lib/api/cms";
+import { BuiltInVisibility } from "@/components/cms/BuiltInSection";
 
 type Question = { id: string; prompt: string; options: { id: string; text: string }[]; correctOptionId: string };
 type Assessment = { heading: string; instructions: string; accessCode: string; durationSeconds: number; passMark: number; showAnswerReview: boolean; questions: Question[] };
@@ -41,6 +42,10 @@ function fromCms(page: CmsPublicPage): Assessment {
 }
 
 export function ExamAssessmentPreview() {
+  return <BuiltInVisibility sectionId="exam-assessment" sectionType="exam_assessment"><AssessmentContent /></BuiltInVisibility>;
+}
+
+function AssessmentContent() {
   const [assessment, setAssessment] = useState(fallback);
   const [loaded, setLoaded] = useState(false);
   const [stage, setStage] = useState<"access" | "exam" | "review" | "results">("access");

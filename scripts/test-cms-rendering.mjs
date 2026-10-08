@@ -37,6 +37,116 @@ const revision = {
   body: "", sections: [{ slot: "hero_image", data: { image_url: "/images/updated-hero.png" }, is_enabled: true }],
 };
 
+const { BuiltInSection } = load(path.join(root, "src/components/cms/BuiltInSection"));
+const { BuiltInSections } = load(path.join(root, "src/components/admin/cms/BuiltInSections"));
+const { PageContent, SectionRenderer } = load(path.join(root, "src/components/cms/ContentRenderer"));
+const { CmsRevisionRenderer } = load(path.join(root, "src/components/cms/CmsPublishedRoute"));
+const { setSectionState, sectionState, replaceSectionGroup } = load(path.join(root, "src/lib/cms/sectionVisibility"));
+const { builtInSections, nativeSectionTypes } = load(path.join(root, "src/lib/cms/builtInSections"));
+const cmsRender = (element, sections, slug = "example") => renderToStaticMarkup(React.createElement(CmsPageContext.Provider, { value: { slug, revision: { ...revision, sections } } }, element));
+
+test("CMS visibility hides and removes complete sections, and restores their content", () => {
+  const element = React.createElement(BuiltInSection, { sectionId: "example", className: "background-and-spacing" }, "Saved section content");
+  const initial = [...revision.sections];
+  for (const state of ["hidden", "removed"]) {
+    const sections = setSectionState(initial, "example", state);
+    assert.equal(cmsRender(element, sections), "");
+    assert.equal(sectionState({ sections }, "example"), state);
+    const restored = setSectionState(sections, "example");
+    assert.match(cmsRender(element, restored), /Saved section content/);
+    assert.equal(restored.length, initial.length + 1);
+    assert.strictEqual(restored[0], initial[0]);
+  }
+  assert.equal(initial.length, 1, "Visibility edits must not mutate the source draft");
+});
+
+test("CMS editor offers visibility controls and restores removed built-in sections", () => {
+  const html = renderToStaticMarkup(React.createElement(BuiltInSections, {
+    path: "/services", sections: setSectionState([], "services-process", "removed"), onChange() {},
+  }));
+  for (const text of ["Built-in page sections", "Our perspective", "What we offer", "What to expect", "Show section", "Remove section", "Restore section", "(removed)"]) assert.ok(html.includes(text), `Missing control: ${text}`);
+});
+
+test("CMS group edits never duplicate countdowns or galleries, and preserve unrelated sections", () => {
+  const [hero, first, middle, second, layout] = ["hero", "first", "middle", "second", "layout"].map((id) => ({ id }));
+  const all = [hero, first, middle, second, layout];
+  const edited = { id: "edited" };
+  assert.deepEqual(replaceSectionGroup(all, [first, second], [second]), [hero, second, middle, layout]);
+  assert.deepEqual(replaceSectionGroup(all, [first, second], [first, edited]), [hero, first, middle, edited, layout]);
+  assert.deepEqual(replaceSectionGroup(all, [first, second], []), [hero, middle, layout]);
+  assert.deepEqual(replaceSectionGroup(all, [first, second], [first, second, edited]), [hero, first, middle, second, edited, layout]);
+  assert.deepEqual(replaceSectionGroup(all, [], [edited]), [...all, edited]);
+  assert.equal(all.length, 5);
+});
+
+test("CMS generic rendering hides hero and body and never renders layout metadata", () => {
+  let sections = setSectionState([], "hero", "hidden");
+  sections = setSectionState(sections, "body", "removed");
+  const html = renderToStaticMarkup(React.createElement(PageContent, { revision: { ...revision, body: "Saved body", sections } }));
+  assert.equal(html, "");
+  const restored = setSectionState(setSectionState(sections, "hero"), "body");
+  assert.match(renderToStaticMarkup(React.createElement(PageContent, { revision: { ...revision, body: "Saved body", sections: restored } })), /Saved body/);
+  assert.equal(renderToStaticMarkup(React.createElement(SectionRenderer, { section: { slot: "main", section_type: "rich_text", is_enabled: false, data: { heading: "Hidden" } } })), "");
+});
+
+test("CMS custom native sections do not leave headings, placeholders or fallback assessments when removed", () => {
+  const cases = [
+    ["training/CpdMonthlySeminars", "CpdMonthlySeminars", "seminar_list", "training-cpd"],
+    ["training/CpdVideoLibrary", "CpdVideoLibrary", "video_list", "training-cpd"],
+    ["training/ExamAssessmentPreview", "ExamAssessmentPreview", "exam_assessment", "training-exams"],
+    ["about/SecretariatGrid", "SecretariatGrid", "profile_gallery", "about-secretariat"],
+    ["knowledge/ResourcesDocuments", "ReportsDocuments", "document_list", "knowledge-reports"],
+  ];
+  for (const [file, name, type, slug] of cases) {
+    const Component = load(path.join(root, "src/components", file))[name];
+    for (const sections of [[], [{ slot: "main", section_type: type, position: 0, data: {}, is_enabled: false }]]) {
+      assert.equal(cmsRender(React.createElement(Component), sections, slug), "", `${name} should disappear`);
+    }
+    const sections = [{ slot: "main", section_type: type, position: 0, data: {}, is_enabled: true }];
+    assert.match(cmsRender(React.createElement(Component), sections, slug), /<section/, `${name} should remain when enabled`);
+  }
+});
+
+test("CMS native document and gallery data is not rendered a second time below the page", () => {
+  for (const path of ["/knowledge/reports", "/media/event-gallery", "/training/exams"]) {
+    const section_type = nativeSectionTypes(path)[0];
+    const html = renderToStaticMarkup(React.createElement(PageContent, { sectionsOnly: true, omitSectionTypes: nativeSectionTypes(path), revision: { ...revision, sections: [{ slot: "main", section_type, data: { heading: "Duplicate heading" }, is_enabled: true }] } }));
+    assert.equal(html, "");
+  }
+});
+
+test("CMS actual static pages honor every registered built-in section control", async () => {
+  const routes = [
+    ["/services", "services/page"], ["/about", "about/page"], ["/events", "events/page"],
+    ["/training", "training/page"], ["/membership", "membership/page"], ["/news", "news/page"],
+    ["/knowledge", "knowledge/page"], ["/contact", "contact/page"],
+    ["/about/vision-mission", "about/[slug]/page", "vision-mission"],
+    ["/about/council", "about/[slug]/page", "council"],
+    ["/about/secretariat", "about/[slug]/page", "secretariat"],
+    ["/about/partners", "about/[slug]/page", "partners"],
+    ["/about/history", "about/[slug]/page", "history"],
+    ["/membership/fees", "membership/[slug]/page", "fees"],
+    ["/membership/members-in-good-standing", "membership/[slug]/page", "members-in-good-standing"],
+    ["/membership/categories", "membership/[slug]/page", "categories"],
+    ["/training/professional", "training/[slug]/page", "professional"],
+    ["/training/cpd", "training/[slug]/page", "cpd"],
+    ["/training/exams", "training/[slug]/page", "exams"],
+    ["/media/event-gallery", "media/event-gallery/page"],
+    ["/services/board-evaluation", "services/[slug]/page", "board-evaluation"],
+  ];
+  for (const [route, file, slug] of routes) {
+    const Component = load(path.join(root, "src/app", file)).default;
+    const element = slug ? await Component({ params: Promise.resolve({ slug }) }) : React.createElement(Component);
+    const hidden = builtInSections(route).reduce((sections, { key }) => setSectionState(sections, key, "hidden"), []);
+    assert.equal(cmsRender(element, hidden), "", `All built-in sections should be hidden on ${route}`);
+  }
+});
+
+test("CMS empty homepage remains empty after the last section is removed", () => {
+  const html = renderToStaticMarkup(React.createElement(CmsRevisionRenderer, { templateKey: "home", revision: { ...revision, sections: [] } }));
+  assert.equal(html, "<main></main>");
+});
+
 test("Members in Good Standing renders CMS hero fields and selected image", async () => {
   const page = await MembershipDetail({ params: Promise.resolve({ slug: "members-in-good-standing" }) });
   const html = renderToStaticMarkup(React.createElement(CmsPageContext.Provider, { value: { slug: "membership-members-in-good-standing", revision } }, page));

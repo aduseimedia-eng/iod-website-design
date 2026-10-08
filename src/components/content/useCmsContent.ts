@@ -54,7 +54,7 @@ export function useCmsPage(slug: string | undefined, fallback: CmsPageCopy) {
         title: content.revision.title,
         summary: content.revision.summary,
         body: content.revision.body,
-        blocks: content.revision.sections.map((section) => ({ type: section.section_type, ...section.data })),
+        blocks: content.revision.sections.filter((section) => section.is_enabled).flatMap((section) => Array.isArray(section.data.legacy_blocks) ? section.data.legacy_blocks : [{ type: section.section_type, ...section.data }]),
       })).catch(() => getPublishedContentPage(slug)).then((content) => {
         if (!cancelled) setPage(content);
       }).catch(() => undefined);
