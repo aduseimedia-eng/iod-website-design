@@ -82,3 +82,16 @@ test("Partner logos omit missing or unsafe images and do not invent placeholders
   assert.equal(renderToStaticMarkup(React.createElement(PartnerLogos, { items: [] })), "");
   assert.equal(renderToStaticMarkup(React.createElement(PartnerLogos, { items: [{ id: "bad", title: "Invalid", image_url: "javascript:alert(1)", href: "", metadata: {} }] })), "");
 });
+
+test("Homepage upcoming events label and heading link to the Events page", () => {
+  for (const props of [{}, { revision: { sections: [{
+    slot: "main", section_type: "card_grid", is_enabled: true, position: 0,
+    data: { home_section: "training", eyebrow: "Upcoming events", heading: "Meet our directors", button_label: "Explore all events", button_href: "/events" },
+  }] } }]) {
+    const html = renderToStaticMarkup(React.createElement(HomepageContent, props));
+    assert.match(html, /<a[^>]*href="\/events"[^>]*>Upcoming events<\/a>/);
+    assert.match(html, /<h2[^>]*><a[^>]*href="\/events"[^>]*>(?:Develop your directorship\.|Meet our directors)<\/a><\/h2>/);
+    assert.match(html, /<a[^>]*href="\/events"[^>]*>Explore all events /);
+    assert.match(html, /href="\/events\/[^"/]+"[^>]*>View event /);
+  }
+});
