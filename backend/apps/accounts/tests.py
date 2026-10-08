@@ -85,14 +85,14 @@ class AuthenticationApiTests(TestCase):
     def test_verification_and_password_reset_tokens_are_server_validated(self):
         user = User.objects.create_user("member@example.com", "Secure-pass-123!")
         client = self.csrf_client()
-        verification = user_token_data(user)
+        verification = user_token_data(user, purpose="verification")
 
         verified = client.post("/api/v1/auth/email-verification/confirm/", data=verification, content_type="application/json")
         self.assertEqual(verified.status_code, 200)
         user.refresh_from_db()
         self.assertIsNotNone(user.email_verified_at)
 
-        reset = user_token_data(user)
+        reset = user_token_data(user, purpose="password_reset")
         completed = client.post("/api/v1/auth/password-reset/confirm/", data={**reset, "password": "New-secure-pass-123!"}, content_type="application/json")
         self.assertEqual(completed.status_code, 204)
 

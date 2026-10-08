@@ -3,6 +3,7 @@ from __future__ import annotations
 from urllib.parse import urlparse
 
 from rest_framework import serializers
+from apps.common.uploads import validate_upload
 from .cms_text import clean_text, clean_data, safe_link
 
 from .models import (
@@ -37,11 +38,7 @@ class CMSMediaAssetSerializer(serializers.ModelSerializer):
     file_url = serializers.SerializerMethodField()
 
     def validate_file(self, upload):
-        allowed_images = {'image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/x-icon', 'image/vnd.microsoft.icon'}
-        mime = upload.content_type or ''
-        if upload.size > 20 * 1024 * 1024 or not (mime in allowed_images or mime == 'application/pdf' or mime.startswith(('audio/', 'video/'))):
-            raise serializers.ValidationError('Choose an image, PDF, video or audio file under 20 MB. SVG and HTML are not supported.')
-        return upload
+        return validate_upload(upload)
 
     class Meta:
         model = CMSMediaAsset

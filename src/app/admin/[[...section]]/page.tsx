@@ -1,6 +1,7 @@
 import { MembershipAdmin } from "@/components/admin/MembershipAdmin";
 import { DirectoryAdmin } from "@/components/admin/DirectoryAdmin";
 import { CmsAdmin } from "@/components/admin/CmsAdmin";
+import { AnalyticsAdmin } from "@/components/admin/AnalyticsAdmin";
 import { PortalSidebar } from "@/components/layout/PortalSidebar";
 import { redirect } from "next/navigation";
 
@@ -20,6 +21,7 @@ const titles: Record<string, string> = {
   staff: "Staff",
   roles: "Roles",
   "audit-logs": "Audit logs",
+  analytics: "Website analytics",
   settings: "Settings",
 };
 
@@ -36,5 +38,5 @@ export default async function AdminPage({ params }: { params: Promise<{ section?
   const title = pageSlug === "footer" ? "Site footer" : pageSlug ? "Edit Page" : titles[key] ?? "Admin";
   const cmsView = key === "content" ? "pages" : ["news", "media", "navigation", "settings"].includes(key) ? key : null;
 
-  return <main className="grid min-h-[calc(100dvh-72px)] bg-[var(--color-warm-white)] md:grid-cols-[230px_1fr]"><PortalSidebar admin active={key} /><section className="min-w-0 p-5 sm:p-8"><h1 className="text-3xl tracking-tight">{title}</h1>{key === "directory" ? <DirectoryAdmin /> : cmsView ? <CmsAdmin key={cmsView + (pageSlug || "")} view={cmsView} pageSlug={pageSlug} /> : <MembershipAdmin section={key} title={title} />}</section></main>;
+  return <main className="grid min-h-[calc(100dvh-72px)] bg-[var(--color-warm-white)] md:grid-cols-[230px_1fr]"><PortalSidebar admin active={key} /><section className="min-w-0 p-5 sm:p-8"><h1 className="text-3xl tracking-tight">{title}</h1>{key === "analytics" ? <AnalyticsAdmin /> : key === "directory" ? <DirectoryAdmin /> : cmsView ? <CmsAdmin key={cmsView + (pageSlug || "")} view={cmsView} pageSlug={pageSlug} /> : <MembershipAdmin section={key} title={title} />}</section></main>;
 }

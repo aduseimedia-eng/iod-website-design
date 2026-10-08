@@ -69,7 +69,7 @@ TEMPLATES = [{
 
 DATABASES = {
     "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL", "postgresql://iod_gh:iod_gh@localhost:55432/iod_gh"),
+        default=os.getenv("DATABASE_URL", "postgresql://iod_gh@127.0.0.1:55432/iod_gh"),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -100,7 +100,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
     "EXCEPTION_HANDLER": "apps.common.api.exception_handler",
-    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+    "DEFAULT_THROTTLE_CLASSES": ["apps.common.throttling.ScopedRateThrottle"],
+    "NUM_PROXIES": 0,
     "DEFAULT_THROTTLE_RATES": {
         "login": "5/min",
         "registration": "3/hour",
@@ -108,6 +109,7 @@ REST_FRAMEWORK = {
         "email_verification": "5/hour",
         "membership_application": "5/hour",
         "contact_enquiry": "5/hour",
+        "analytics_visit": "120/min",
     },
 }
 
@@ -125,6 +127,12 @@ SPECTACULAR_SETTINGS = {
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
+# Empty by default: never trust forwarding headers from arbitrary clients.
+TRUSTED_PROXY_CIDRS = env_list("TRUSTED_PROXY_CIDRS")
+PASSWORD_RESET_TIMEOUT = 3600
+CLAMAV_HOST = os.getenv("CLAMAV_HOST", "")
+CLAMAV_PORT = int(os.getenv("CLAMAV_PORT", "3310"))
+UPLOAD_SCAN_REQUIRED = False  # Production overrides this unconditionally.
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")
 ADMIN_ENABLED = os.getenv("DJANGO_ENABLE_ADMIN", "false").lower() == "true"
 

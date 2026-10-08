@@ -313,7 +313,7 @@ class StaffCMSMediaListView(APIView):
         upload = request.FILES.get("file")
         if not upload:
             raise ValidationError({"file": ["Choose a file to upload."]})
-        CMSMediaAssetSerializer().validate_file(upload)
+        upload = CMSMediaAssetSerializer().validate_file(upload)
         if upload.size > 20 * 1024 * 1024:
             raise ValidationError({"file": ["Files must be 20 MB or smaller."]})
         mime_type = upload.content_type or mimetypes.guess_type(upload.name)[0] or "application/octet-stream"
@@ -336,7 +336,7 @@ class StaffCMSMediaDetailView(APIView):
         serializer = CMSMediaAssetSerializer(asset, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
         asset = serializer.save()
-        if upload := request.FILES.get("file"):
+        if upload := serializer.validated_data.get("file"):
             asset.original_filename = upload.name[:255]
             asset.mime_type = upload.content_type or ""
             asset.byte_size = upload.size

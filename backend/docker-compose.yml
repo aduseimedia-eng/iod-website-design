@@ -1,12 +1,33 @@
 services:
+  upload-scanner:
+    image: clamav/clamav:1.4
+    profiles: ["security"]
+    environment:
+      CLAMD_CONF_AlertExceedsMax: "yes"
+      CLAMD_CONF_AlertEncrypted: "yes"
+      CLAMD_CONF_StreamMaxLength: "25M"
+      CLAMD_CONF_MaxFileSize: "25M"
+      CLAMD_CONF_MaxScanSize: "100M"
+      CLAMD_CONF_MaxScanTime: "10000"
+      CLAMD_CONF_MaxRecursion: "16"
+      CLAMD_CONF_MaxFiles: "1000"
+      CLAMD_CONF_ConcurrentDatabaseReload: "no"
+      FRESHCLAM_CHECKS: "12"
+    ports:
+      - "127.0.0.1:3310:3310"
+    volumes:
+      - iod_gh_clamav_data:/var/lib/clamav
+    mem_limit: 4g
+    restart: unless-stopped
+
   database:
     image: postgres:17-alpine
     environment:
       POSTGRES_DB: iod_gh
       POSTGRES_USER: iod_gh
-      POSTGRES_PASSWORD: iod_gh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a strong POSTGRES_PASSWORD in backend/.env}
     ports:
-      - "55432:5432"
+      - "127.0.0.1:55432:5432"
     volumes:
       - iod_gh_postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,9 +40,9 @@ services:
     image: dpage/pgadmin4:9.2
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:?Set PGADMIN_DEFAULT_PASSWORD in backend/.env}
     ports:
-      - "5050:80"
+      - "127.0.0.1:5050:80"
     volumes:
       - iod_gh_pgadmin_server_data:/var/lib/pgadmin
       - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
@@ -30,5 +51,6 @@ services:
         condition: service_healthy
 
 volumes:
+  iod_gh_clamav_data:
   iod_gh_postgres_data:
   iod_gh_pgadmin_server_data:

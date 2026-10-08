@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from rest_framework import serializers
+from apps.common.uploads import validate_upload
 
 from .models import MemberDirectoryEntry, MemberProfile, MembershipApplication, MembershipRenewal, MembershipStatusHistory, MembershipType
 from .services import application_reference
@@ -20,12 +21,7 @@ class MembershipApplicationSubmitSerializer(serializers.ModelSerializer):
         fields = ("application_kind", "current_membership_number", "first_name", "last_name", "email", "phone_number", "organisation", "current_role", "recommending_agent", "cv")
 
     def validate_cv(self, value):
-        filename = value.name.lower()
-        if not filename.endswith((".pdf", ".doc", ".docx")):
-            raise serializers.ValidationError("Upload a PDF, DOC, or DOCX CV.")
-        if value.size > 10 * 1024 * 1024:
-            raise serializers.ValidationError("The CV must be 10 MB or smaller.")
-        return value
+        return validate_upload(value, cv=True)
 
     def validate(self, attrs):
         if attrs["application_kind"] == MembershipApplication.Kind.UPGRADE and not attrs.get("current_membership_number", "").strip():

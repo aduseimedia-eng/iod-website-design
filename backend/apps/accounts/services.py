@@ -3,19 +3,20 @@ from __future__ import annotations
 from urllib.parse import urlencode
 
 from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 
 from apps.common.email import send_institutional_email
+from .tokens import password_reset_token_generator, verification_token_generator
 
 
-def user_token_data(user) -> dict[str, str]:
-    return {"uid": urlsafe_base64_encode(force_bytes(user.pk)), "token": default_token_generator.make_token(user)}
+def user_token_data(user, *, purpose: str) -> dict[str, str]:
+    generator = {"verification": verification_token_generator, "password_reset": password_reset_token_generator}[purpose]
+    return {"uid": urlsafe_base64_encode(force_bytes(user.pk)), "token": generator.make_token(user)}
 
 
 def send_verification_email(user) -> None:
-    token_data = user_token_data(user)
+    token_data = user_token_data(user, purpose="verification")
     url = f"{settings.FRONTEND_BASE_URL.rstrip('/')}/verify-email?{urlencode(token_data)}"
     send_institutional_email(
         subject="Verify your IoD-Gh account",
@@ -30,7 +31,7 @@ def send_verification_email(user) -> None:
 
 
 def send_password_reset_email(user) -> None:
-    token_data = user_token_data(user)
+    token_data = user_token_data(user, purpose="password_reset")
     url = f"{settings.FRONTEND_BASE_URL.rstrip('/')}/reset-password?{urlencode(token_data)}"
     send_institutional_email(
         subject="Reset your IoD-Gh password",

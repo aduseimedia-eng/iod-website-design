@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from urllib.parse import urlparse
 
 from .models import ContactEnquiry
 
@@ -20,3 +21,21 @@ class ContactEnquiryResponseSerializer(serializers.ModelSerializer):
         model = ContactEnquiry
         fields = ("id", "status", "created_at")
         read_only_fields = fields
+
+
+class AnalyticsVisitSerializer(serializers.Serializer):
+    path = serializers.CharField(max_length=255)
+    referrer = serializers.CharField(max_length=2048, required=False, allow_blank=True)
+
+    def validate_path(self, value: str) -> str:
+        if not value.startswith("/") or value.startswith("//") or "?" in value or "#" in value:
+            raise serializers.ValidationError("Enter an internal path without a query string or fragment.")
+        return value
+
+    def validate_referrer(self, value: str) -> str:
+        if not value:
+            return ""
+        parsed = urlparse(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            return ""
+        return parsed.netloc.lower()

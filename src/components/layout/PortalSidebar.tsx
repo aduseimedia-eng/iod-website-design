@@ -9,7 +9,7 @@ const memberLinks = ["dashboard", "my-profile", "membership", "events", "trainin
 const groups = [
   { title: "Content", links: [["Pages", "/admin/content"], ["News", "/admin/news"]] },
   { title: "Media", links: [["Media Library", "/admin/media"]] },
-  { title: "Website", links: [["Navigation", "/admin/navigation"], ["Settings", "/admin/settings"]] },
+  { title: "Website", links: [["Navigation", "/admin/navigation"], ["Analytics", "/admin/analytics"], ["Settings", "/admin/settings"]] },
   { title: "Membership", links: [["Members", "/admin/members"], ["Applications", "/admin/applications"], ["Directory", "/admin/directory"]] },
 ];
 export function PortalSidebar({ admin = false, active = "dashboard" }: { admin?: boolean; active?: string }) {

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.tokens import default_token_generator
+from django.db import transaction
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.utils.encoding import force_str
@@ -14,7 +15,7 @@ from rest_framework.decorators import api_view
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
+from apps.common.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.audit.services import record_event
@@ -22,15 +23,16 @@ from apps.audit.services import record_event
 from .models import User
 from .serializers import EmailTokenSerializer, LoginSerializer, PasswordChangeSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, RegistrationSerializer, UserSerializer
 from .services import send_password_reset_email, send_verification_email
+from .tokens import password_reset_token_generator, verification_token_generator
 
 
-def token_user(uid: str, token: str) -> User:
+def token_user(uid: str, token: str, *, generator) -> User:
     try:
         user_id = force_str(urlsafe_base64_decode(uid))
-        user = User.objects.get(pk=user_id)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = User.objects.select_for_update().get(pk=user_id, is_active=True)
+    except (TypeError, ValueError, OverflowError, DjangoValidationError, User.DoesNotExist):
         raise ValidationError({"token": ["The link is invalid or has expired."]})
-    if not default_token_generator.check_token(user, token):
+    if not generator.check_token(user, token):
         raise ValidationError({"token": ["The link is invalid or has expired."]})
     return user
 
@@ -104,10 +106,11 @@ class EmailVerificationConfirmView(APIView):
     throttle_scope = "email_verification"
 
     @extend_schema(request=EmailTokenSerializer, responses={200: UserSerializer})
+    @transaction.atomic
     def post(self, request):
         serializer = EmailTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = token_user(**serializer.validated_data)
+        user = token_user(**serializer.validated_data, generator=verification_token_generator)
         if user.email_verified_at:
             raise ValidationError({"email": ["This email address has already been verified."]})
         from django.utils import timezone
@@ -159,10 +162,11 @@ class PasswordResetConfirmView(APIView):
     throttle_scope = "password_reset"
 
     @extend_schema(request=PasswordResetConfirmSerializer, responses={204: None})
+    @transaction.atomic
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = token_user(serializer.validated_data["uid"], serializer.validated_data["token"])
+        user = token_user(serializer.validated_data["uid"], serializer.validated_data["token"], generator=password_reset_token_generator)
         user.set_password(serializer.validated_data["password"])
         user.save(update_fields=["password", "updated_at"])
         record_event(action="account.password_reset_completed", target_type="user", target_id=user.id, actor=user, request=request)

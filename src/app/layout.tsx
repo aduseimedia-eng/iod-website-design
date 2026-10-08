@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { connection } from "next/server";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { CmsRouteSwitch } from "@/components/cms/CmsPublishedRoute";
 import { SiteSettingsProvider } from "@/components/cms/SiteSettings";
 import { apiBaseUrl } from "@/lib/api/client";
+import { AnalyticsTracker } from "@/components/analytics/AnalyticsTracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,7 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
   } catch { return defaultMetadata; }
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  // Each document must be rendered with its own CSP nonce, never a cached one.
+  await connection();
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen">
@@ -34,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Header />
         <CmsRouteSwitch>{children}</CmsRouteSwitch>
         <Footer />
+        <AnalyticsTracker />
         </SiteSettingsProvider>
       </body>
     </html>

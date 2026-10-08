@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 
 from .api import exception_handler
-from .models import ContactEnquiry
+from .models import AnalyticsDailyVisitor, AnalyticsPageView, ContactEnquiry
 
 
 class HealthEndpointTests(TestCase):
@@ -57,3 +57,33 @@ class ContactEnquiryTests(TestCase):
         self.assertEqual(mail.outbox[0].subject, "New IoD-Gh website enquiry — Training")
         self.assertEqual(mail.outbox[0].reply_to, ["ama@example.com"])
         self.assertEqual(mail.outbox[1].subject, "We received your IoD-Gh enquiry")
+
+
+class AnalyticsTests(TestCase):
+    def test_public_page_view_is_aggregated_without_storing_source_identifiers(self):
+        response = APIClient().post(
+            "/api/v1/analytics/visits/",
+            {"path": "/membership", "referrer": "https://www.google.com/search?q=iod"},
+            format="json",
+            REMOTE_ADDR="203.0.113.5",
+            HTTP_USER_AGENT="Test Mobile Browser",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(AnalyticsPageView.objects.count(), 1)
+        self.assertEqual(AnalyticsPageView.objects.get().referrer_host, "www.google.com")
+        self.assertEqual(AnalyticsPageView.objects.get().device_type, "mobile")
+        self.assertEqual(AnalyticsDailyVisitor.objects.count(), 1)
+        self.assertFalse(hasattr(AnalyticsPageView.objects.get(), "ip_address"))
+
+    def test_staff_report_returns_aggregate_counts(self):
+        client = APIClient()
+        client.post("/api/v1/analytics/visits/", {"path": "/"}, format="json", REMOTE_ADDR="203.0.113.5")
+        from apps.accounts.models import User
+        client.force_authenticate(User.objects.create_user(email="admin@example.com", password="pass", is_staff=True))
+
+        response = client.get("/api/v1/analytics/report/?days=7")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["totals"]["page_views"], 1)
+        self.assertEqual(response.data["today"]["unique_visitors"], 1)

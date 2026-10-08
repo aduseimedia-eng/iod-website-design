@@ -1,4 +1,6 @@
 import json
+from io import BytesIO
+from pypdf import PdfWriter
 from datetime import date
 
 from django.contrib.auth.models import Group
@@ -34,6 +36,10 @@ class MembershipApiTests(TestCase):
         return client
 
     def submit_application(self, **overrides):
+        pdf = BytesIO()
+        writer = PdfWriter()
+        writer.add_blank_page(width=595, height=842)
+        writer.write(pdf)
         payload = {
             "application_kind": MembershipApplication.Kind.NEW_MEMBERSHIP,
             "first_name": "Akosua",
@@ -42,7 +48,7 @@ class MembershipApiTests(TestCase):
             "phone_number": "+233201234567",
             "organisation": "Example Ghana Ltd",
             "current_role": "Director",
-            "cv": SimpleUploadedFile("akosua-owusu-cv.pdf", b"sample CV", content_type="application/pdf"),
+            "cv": SimpleUploadedFile("akosua-owusu-cv.pdf", pdf.getvalue(), content_type="application/pdf"),
         }
         payload.update(overrides)
         response = self.csrf_client().post(
