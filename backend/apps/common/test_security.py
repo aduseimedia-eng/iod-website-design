@@ -26,8 +26,9 @@ class SharedRateLimitTests(TestCase):
         codes = [client.post("/api/v1/auth/login/", {"email": "nobody@example.com", "password": "wrong"},
                              REMOTE_ADDR="192.0.2.10", HTTP_X_FORWARDED_FOR=f"198.51.100.{i}").status_code for i in range(6)]
         self.assertEqual(codes, [403, 403, 403, 403, 403, 429])
-        self.assertEqual(RateLimitBucket.objects.count(), 1)
-        self.assertNotIn("192.0.2.10", RateLimitBucket.objects.get().key)
+        # Login protection uses an IP bucket and a separate account bucket.
+        self.assertEqual(RateLimitBucket.objects.count(), 2)
+        self.assertTrue(all("192.0.2.10" not in bucket.key for bucket in RateLimitBucket.objects.all()))
 
     def test_separate_instances_share_history_and_expired_attempts_are_removed(self):
         request = APIRequestFactory().get("/", REMOTE_ADDR="192.0.2.11")

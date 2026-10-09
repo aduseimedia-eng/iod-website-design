@@ -3,6 +3,7 @@ import hmac
 from datetime import timedelta
 
 from django.conf import settings
+from django.db import DatabaseError, connection
 from django.db.models import Count
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -31,6 +32,10 @@ class HealthResponseSerializer(Serializer):
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def health(request):
+    try:
+        connection.ensure_connection()
+    except DatabaseError:
+        return Response({"status": "unavailable", "service": "iod-gh-api", "version": "v1"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     return Response({"status": "ok", "service": "iod-gh-api", "version": "v1"})
 
 

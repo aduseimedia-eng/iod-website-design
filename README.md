@@ -36,6 +36,14 @@ The membership application and protected member portal use the centralized API c
 
 See [backend/README.md](backend/README.md) for environment setup, PostgreSQL development configuration, migration commands, endpoints, and test commands.
 
+## Railway deployment
+
+The repository is prepared as a three-service Railway monorepo: the main site,
+the examination portal, and the Django API. See
+[docs/railway-deployment.md](docs/railway-deployment.md) for the required
+domains, service roots, environment variables, PostgreSQL, ClamAV, durable media
+storage, and release checks. Secrets are configured only in Railway, never in Git.
+
 ## Current backend scope
 
 Training, examinations, payment collection, notifications, and provider integrations remain staged work. Membership rules, public-listing consent, fees, renewal periods, and retention decisions remain configurable and require IoD-Gh approval before live use.

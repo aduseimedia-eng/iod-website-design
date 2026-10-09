@@ -19,6 +19,10 @@ DEBUG = False
 UPLOAD_SCAN_REQUIRED = True
 if not CLAMAV_HOST:  # noqa: F405
     raise ImproperlyConfigured("CLAMAV_HOST must be configured for production upload scanning.")
+# Railway's public HTTP proxy always sets X-Forwarded-Proto to HTTPS. This is
+# opt-in so other deployments never trust a client-supplied header by default.
+if os.getenv("DJANGO_TRUST_PROXY_SSL_HEADER", "false").lower() == "true":
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

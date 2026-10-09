@@ -1,5 +1,7 @@
 from django.core import mail
+from django.db import DatabaseError
 from django.test import Client, TestCase
+from unittest.mock import patch
 from rest_framework.exceptions import ValidationError
 from rest_framework.test import APIClient, APIRequestFactory
 
@@ -14,6 +16,13 @@ class HealthEndpointTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "ok", "service": "iod-gh-api", "version": "v1"})
         self.assertIn("X-Request-ID", response)
+
+    @patch("apps.common.views.connection.ensure_connection", side_effect=DatabaseError)
+    def test_health_endpoint_reports_database_unavailability(self, _ensure_connection):
+        response = APIClient().get("/api/v1/health/")
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json(), {"status": "unavailable", "service": "iod-gh-api", "version": "v1"})
 
     def test_openapi_schema_is_available(self):
         response = APIClient().get("/api/schema/")
