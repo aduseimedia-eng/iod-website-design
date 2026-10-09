@@ -5,6 +5,7 @@ import test from "node:test";
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const styles = read("apps/exam-portal/app/styles.css");
 const mainStyles = read("src/app/globals.css");
+const portalLayout = read("apps/exam-portal/app/layout.tsx");
 
 test("Exam pages use the same self-hosted Inter setup as the main site", () => {
   for (const path of ["src/app/layout.tsx", "apps/exam-portal/app/layout.tsx"]) {
@@ -17,6 +18,13 @@ test("Exam pages use the same self-hosted Inter setup as the main site", () => {
   assert.match(styles, /font-family: var\(--font-inter\), Arial, Helvetica, sans-serif/);
   assert.doesNotMatch(styles, /Georgia|(?<![-\w])serif\s*[;,}]|monospace/);
   assert.match(styles, /font-variant-numeric: tabular-nums/);
+});
+
+test("Exam portal uses the CMS navbar logo with the main site's visible treatment", () => {
+  assert.match(portalLayout, /getPortalBrand/);
+  assert.match(portalLayout, /className="brand-logo"/);
+  assert.match(styles, /\.brand-logo\s*\{[^}]*object-fit: contain[^}]*filter:/);
+  assert.match(read("apps/exam-portal/proxy.ts"), /img-src 'self' data: \$\{apiOrigin\}/);
 });
 
 test("Exam colors stay aligned with the main website", () => {

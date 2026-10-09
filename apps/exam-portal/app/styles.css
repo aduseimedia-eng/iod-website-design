@@ -36,6 +36,7 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 .masthead { background: var(--warm-white); border-bottom: 1px solid var(--line); }
 .masthead-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 72px; }
 .brand { display: flex; align-items: center; gap: 16px; }
+.brand-logo { width: 48px; height: 48px; flex: 0 0 auto; object-fit: contain; filter: brightness(0) saturate(100%) invert(12%) sepia(26%) saturate(3710%) hue-rotate(223deg) brightness(84%) contrast(101%); }
 .brand strong { font-size: 28px; font-weight: 700; line-height: 1; letter-spacing: -.05em; white-space: nowrap; }
 .brand strong span { font-weight: 600; }
 .brand > span { max-width: 180px; font-size: 13px; font-weight: 700; line-height: 1.4; }
