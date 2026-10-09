@@ -20,11 +20,11 @@ test("Exam pages use the same self-hosted Inter setup as the main site", () => {
   assert.match(styles, /font-variant-numeric: tabular-nums/);
 });
 
-test("Exam portal uses the CMS navbar logo with the main site's visible treatment", () => {
-  assert.match(portalLayout, /getPortalBrand/);
-  assert.match(portalLayout, /className="brand-logo"/);
-  assert.match(styles, /\.brand-logo\s*\{[^}]*object-fit: contain[^}]*filter:/);
-  assert.match(read("apps/exam-portal/proxy.ts"), /img-src 'self' data: \$\{apiOrigin\}/);
+test("Exam portal header has no empty logo space or duplicate IoD-Gh wordmark", () => {
+  assert.doesNotMatch(portalLayout, /getPortalBrand|brand-logo|IoD<span>-Gh<\/span>/);
+  assert.doesNotMatch(styles, /\.brand-logo|\.brand strong/);
+  assert.match(portalLayout, />Institute of Directors-Ghana</);
+  assert.match(read("apps/exam-portal/proxy.ts"), /img-src 'self' data:;/);
 });
 
 test("Exam colors stay aligned with the main website", () => {

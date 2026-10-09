@@ -4,7 +4,7 @@ export function proxy(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const dev = process.env.NODE_ENV === "development";
   const apiOrigin = new URL(process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8010").origin;
-  const policy = `default-src 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}; style-src 'self' 'nonce-${nonce}'; connect-src 'self' ${apiOrigin}${dev ? " ws://localhost:3001 ws://127.0.0.1:3001" : ""}; img-src 'self' data: ${apiOrigin}; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
+  const policy = `default-src 'self'; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ""}; style-src 'self' 'nonce-${nonce}'; connect-src 'self' ${apiOrigin}${dev ? " ws://localhost:3001 ws://127.0.0.1:3001" : ""}; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'`;
   const headers = new Headers(request.headers);
   headers.set("Content-Security-Policy", policy);
   headers.set("x-nonce", nonce);
