@@ -3,6 +3,7 @@ import path from "node:path";
 
 const config: NextConfig = {
   poweredByHeader: false,
+  devIndicators: false,
   turbopack: { root: path.resolve(__dirname, "../..") },
   async headers() {
     return [{ source: "/:path*", headers: [

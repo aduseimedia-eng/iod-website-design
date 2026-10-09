@@ -35,7 +35,8 @@ button:disabled { opacity: .5; cursor: not-allowed; }
 
 .masthead { background: var(--warm-white); border-bottom: 1px solid var(--line); }
 .masthead-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 72px; }
-.brand { min-width: 0; }
+.brand { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.brand-logo { width: 48px; height: 48px; flex: 0 0 auto; object-fit: contain; filter: brightness(0) saturate(100%) invert(12%) sepia(26%) saturate(3710%) hue-rotate(223deg) brightness(84%) contrast(101%); }
 .brand > span { display: block; max-width: 280px; font-size: 15px; font-weight: 700; line-height: 1.3; }
 .portal-label, .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: 11px; font-weight: 700; line-height: 1.4; }
 .portal-label { color: var(--accent-dark); text-align: right; }
