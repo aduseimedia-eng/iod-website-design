@@ -15,6 +15,10 @@ function withHomeLink(items: HeaderLink[]) {
   return [homeLink, ...items.filter((item) => item.href !== "/" && item.label.toLowerCase() !== "home")];
 }
 
+function hasMenuBeyondHome(items: HeaderLink[]) {
+  return items.some((item) => item.href !== "/" && item.label.trim().toLowerCase() !== "home");
+}
+
 function asHeaderLinks(items: CmsNavigationItem[]): HeaderLink[] {
   const enabled = items.filter((item) => item.is_enabled);
   return enabled.filter((item) => !item.parent_id).map((item) => ({
@@ -50,7 +54,9 @@ export function Header() {
     const timer = window.setTimeout(() => {
       getPublishedCmsMenu("header-primary").then((cmsMenu) => {
         const links = asHeaderLinks(cmsMenu.published_revision?.items || []);
-        if (!cancelled && cmsMenu.published_revision) setMenu(withHomeLink(links));
+        // A partially configured CMS menu must not replace the usable default
+        // navigation with Home alone on smaller screens.
+        if (!cancelled && cmsMenu.published_revision && hasMenuBeyondHome(links)) setMenu(withHomeLink(links));
       }).catch(() => undefined);
     }, 0);
     return () => { cancelled = true; window.clearTimeout(timer); };
