@@ -31,7 +31,7 @@ Use `/admin/examinations` on the main website. Access requires a verified, activ
 4. Activate the exam when ready. Students sign in using their existing verified accounts.
 5. Review attempts and their audit trail, release results, or export a selected exam's results as CSV.
 
-Edits create new question/exam versions, never overwrite active or historical snapshots. Result scores cannot be manually edited. Manual amendments would require a separate append-only adjustment model and approval workflow, which are deliberately not implemented.
+Edits create new question/exam versions, never overwrite active or historical snapshots. Removing a question retires it from the future question bank; it does not erase the immutable versions already used in an exam or attempt. Result scores cannot be manually edited. Manual amendments would require a separate append-only adjustment model and approval workflow, which are deliberately not implemented.
 
 Revoking eligibility prevents future starts; it does not silently cancel an already-started attempt. Deactivating an exam also prevents new starts while retaining attempts already issued. All attempts count toward the configured maximum. The current version governs future eligibility; the version recorded on an attempt governs its timing and grading.
 
@@ -53,7 +53,7 @@ This repository does not provision `exam.iodghana.org`, DNS, a hosting account o
 
 ## Security and operational boundaries
 
-- Student endpoints use explicit response allowlists: no answer keys, grading thresholds, explanations or question-bank snapshots are delivered. Even after submission, the student sees only their own released score/grade/pass status. Authorized staff review is a separate audited API.
+- Student endpoints use explicit response allowlists: no answer keys, grading thresholds, explanations or question-bank snapshots are delivered. Even after submission, the student sees only their own released score/grade/pass status. Authorized staff review is a separate audited API. Question order is randomized server-side for every attempt; refreshing does not change an attempt's stored order.
 - Attempt ownership and active status are checked on every answer, question, submission and result request. PostgreSQL uniqueness constraints and row locks serialize starts/submissions. An answer revision detects stale writes from multiple tabs. Same-answer retries and repeated submissions are idempotent.
 - Submitted and expired attempts cannot receive answer updates through the API. Historical model rows are protected from deletion by foreign keys. Database operator access must still be tightly controlled; application authorization is not a substitute for securing privileged database credentials.
 - Timers in the browser use monotonic elapsed time for display only. Django enforces the real expiry independently of browser clocks, hidden fields or submitted scores. Expiration grades only already-saved answers.

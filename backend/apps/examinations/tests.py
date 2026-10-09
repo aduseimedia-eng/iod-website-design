@@ -41,6 +41,9 @@ class ExamFixtures:
     def post(self, path, data=None, client=None):
         return (client or self.client).post("/api/v1/" + path, json.dumps(data or {}, default=str), content_type="application/json")
 
+    def delete(self, path, client=None):
+        return (client or self.client).delete("/api/v1/" + path)
+
     def start(self):
         response = self.post(f"exams/{self.exam.pk}/start/")
         self.assertEqual(response.status_code, 200, response.content)
@@ -124,6 +127,17 @@ class ExaminationSecurityTests(ExamFixtures, TestCase):
         attempt = self.start()
         self.assertEqual(self.questions(attempt).json()["questions"], self.questions(attempt).json()["questions"])
 
+    def test_question_order_is_mandatory_even_when_a_legacy_configuration_says_otherwise(self):
+        self.exam.current_version.configuration["randomize_questions"] = False
+        self.exam.current_version.save(update_fields=["configuration"])
+        with patch("apps.examinations.services.secrets.SystemRandom") as random:
+            self.start()
+        self.assertTrue(random.return_value.shuffle.called)
+
+    def test_new_exam_versions_record_mandatory_question_randomization(self):
+        self.exam = save_exam({**self.config, "randomize_questions": False}, self.staff, None, self.exam.pk)
+        self.assertTrue(self.exam.current_version.configuration["randomize_questions"])
+
     def test_answer_save_update_and_stale_write_protection(self):
         attempt = self.start()
         self.assertEqual(self.save(attempt).status_code, 200)
@@ -184,6 +198,23 @@ class ExaminationSecurityTests(ExamFixtures, TestCase):
         self.save(attempt)
         self.post(f"exam-attempts/{attempt}/submit/")
         self.assertEqual(ExamResult.objects.get().total_marks, Decimal("2"))
+        self.assertEqual(Question.objects.count(), 2)
+
+    def test_authorized_question_removal_retires_the_bank_entry_and_preserves_history(self):
+        attempt = self.start()
+        before = self.questions(attempt).json()["questions"]
+        staff = self.client_for(self.staff)
+        self.assertEqual(self.client.delete(f"/api/v1/exams/staff/questions/{self.question.pk}/").status_code, 403)
+        response = self.delete(f"exams/staff/questions/{self.question.pk}/", staff)
+        self.assertEqual(response.status_code, 200)
+        retired = Question.objects.get(pk=response.json()["id"])
+        self.assertFalse(retired.is_active)
+        self.assertEqual(retired.version, 2)
+        self.assertEqual(Question.objects.count(), 2)
+        self.assertEqual(staff.get("/api/v1/exams/staff/questions/").json()["results"], [])
+        self.assertEqual(self.questions(attempt).json()["questions"], before)
+        self.assertTrue(ExamAuditLog.objects.filter(event="QUESTION_RETIRED", actor=self.staff).exists())
+        self.assertEqual(self.delete(f"exams/staff/questions/{self.question.pk}/", staff).status_code, 200)
         self.assertEqual(Question.objects.count(), 2)
 
     def test_manual_results_are_private_until_authorized_release(self):

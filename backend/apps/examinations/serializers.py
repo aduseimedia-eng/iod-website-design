@@ -41,6 +41,9 @@ class ExamInput(serializers.Serializer):
     question_ids = serializers.ListField(child=serializers.UUIDField(), min_length=1, max_length=1000)
 
     def validate(self, data):
+        # This is a portal-wide fairness policy rather than an administrator
+        # preference. The service repeats this enforcement for trusted callers.
+        data["randomize_questions"] = True
         if data["ends_at"] <= data["starts_at"]:
             raise serializers.ValidationError("The end time must be after the start time.")
         if data["result_release"] == "SCHEDULED" and not data.get("release_at"):

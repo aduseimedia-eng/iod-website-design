@@ -31,7 +31,7 @@ def notify(user, event, title):
 
 
 @transaction.atomic
-def save_question(data, user, request, previous=None):
+def save_question(data, user, request, previous=None, audit_event="QUESTION_VERSION_CREATED"):
     options = data.pop("options")
     if previous:
         # Lock the first revision of the lineage, so editing different revisions
@@ -41,8 +41,28 @@ def save_question(data, user, request, previous=None):
         data.update(lineage=previous.lineage, version=version)
     question = Question.objects.create(**data, created_by=user)
     QuestionOption.objects.bulk_create([QuestionOption(question=question, position=i, **option) for i, option in enumerate(options)])
-    audit("QUESTION_VERSION_CREATED", user=user, request=request, metadata={"question": str(question.id), "version": question.version})
+    audit(audit_event, user=user, request=request, metadata={"question": str(question.id), "version": question.version})
     return question
+
+
+@transaction.atomic
+def retire_question(previous, user, request):
+    """Hide a question from future exam versions without breaking history."""
+    Question.objects.select_for_update().get(lineage=previous.lineage, version=1)
+    current = Question.objects.filter(lineage=previous.lineage).order_by("-version").prefetch_related("options").first()
+    if not current.is_active:
+        return current
+    data = {
+        "text": current.text,
+        "question_type": current.question_type,
+        "marks": current.marks,
+        "explanation": current.explanation,
+        "category": current.category,
+        "difficulty": current.difficulty,
+        "is_active": False,
+        "options": [{"text": option.text, "is_correct": option.is_correct} for option in current.options.all()],
+    }
+    return save_question(data, user, request, previous=current, audit_event="QUESTION_RETIRED")
 
 
 def question_snapshot(question):
@@ -51,6 +71,9 @@ def question_snapshot(question):
 
 @transaction.atomic
 def save_exam(data, user, request, exam_id=None):
+    # Question order is always randomized server-side for every candidate.
+    # Keep the field in version metadata so the policy is visible in audits.
+    data["randomize_questions"] = True
     questions = {q.id: q for q in Question.objects.filter(id__in=data["question_ids"], is_active=True).prefetch_related("options")}
     if len(questions) != len(data["question_ids"]):
         raise ValidationError("All selected questions must exist and be active.")
@@ -96,8 +119,7 @@ def start_attempt(exam_id, user, request):
     rng = secrets.SystemRandom()
     if config["select_from_bank"]:
         questions = rng.sample(questions, config["question_count"])
-    if config["randomize_questions"]:
-        rng.shuffle(questions)
+    rng.shuffle(questions)
     option_order = {}
     for question in questions:
         options = [option["id"] for option in question.snapshot["options"]]

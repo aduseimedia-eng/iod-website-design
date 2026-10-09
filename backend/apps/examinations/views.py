@@ -17,7 +17,7 @@ from apps.common.throttling import ScopedRateThrottle
 from apps.membership.models import MemberProfile
 from .models import Exam, Question, ExamAttempt, ExamAnswer, ExamEligibility, ExamResult, ExamAuditLog
 from .serializers import ExamInput, QuestionInput, AnswerInput, AssignmentInput, QuestionViewedInput, AttemptFilters, ExportFilters
-from .services import audit, available, start_attempt, save_question, save_exam, public_attempt, public_questions, synchronize, finalize, release_result, notify
+from .services import audit, available, start_attempt, save_question, retire_question, save_exam, public_attempt, public_questions, synchronize, finalize, release_result, notify
 
 
 class VerifiedAccount(IsAuthenticated):
@@ -198,7 +198,9 @@ def staff_question(question):
 class StaffQuestions(StaffView):
     def get(self, request):
         latest = Question.objects.filter(lineage=OuterRef("lineage")).order_by("-version").values("id")[:1]
-        questions = Question.objects.filter(id=Subquery(latest)).prefetch_related("options").order_by("-created_at")
+        # Retired questions are absent from the working bank. Their immutable
+        # versions remain available to historical exam records.
+        questions = Question.objects.filter(id=Subquery(latest), is_active=True).prefetch_related("options").order_by("-created_at")
         if request.query_params.get("search"):
             questions = questions.filter(text__icontains=request.query_params["search"][:150])
         if request.query_params.get("category"):
@@ -216,6 +218,11 @@ class StaffQuestionDetail(StaffView):
         previous = get_object_or_404(Question, pk=question_id)
         question = save_question(validated(QuestionInput, request), request.user, request, previous)
         return Response(staff_question(question), status=201)
+
+    def delete(self, request, question_id):
+        previous = get_object_or_404(Question, pk=question_id)
+        question = retire_question(previous, request.user, request)
+        return Response(staff_question(question))
 
 
 def staff_exam(exam):
